@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ponyo Booth - Photobooth Lucu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg: #FFF5E6;
+            --bg-deep: #FFE8CC;
+            --fg: #3D2C1E;
+            --fg-light: #7A6555;
+            --accent: #FF6B6B;
+            --accent2: #FFD93D;
+            --accent3: #6BCB77;
+            --accent4: #4D96FF;
+            --card: #FFFFFF;
+            --border: #FFD4A8;
+            --shadow: rgba(61, 44, 30, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
+
+        /* Background dekorasi */
+        .bg-deco {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .bg-deco::before {
+            content: '';
+            position: absolute;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(255,107,107,0.12) 0%, transparent 70%);
+            top: -50px; right: -50px;
+            border-radius: 50%;
+            animation: floatBlob 8s ease-in-out infinite;
+        }
+        .bg-deco::after {
+            content: '';
+            position: absolute;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(255,217,61,0.1) 0%, transparent 70%);
+            bottom: -100px; left: -100px;
+            border-radius: 50%;
+            animation: floatBlob 10s ease-in-out infinite reverse;
+        }
+
+        @keyframes floatBlob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -20px) scale(1.1); }
+        }
+
+        /* Confetti canvas */
+        #confettiCanvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem 1rem 1rem;
+        }
+        .header h1 {
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #FF8E53, var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+        }
+        .header p {
+            color: var(--fg-light);
+            font-size: 1.05rem;
+            margin-top: 0.3rem;
+            font-weight: 500;
+        }
+
+        /* Kamera area */
+        .camera-wrapper {
+            position: relative;
+            z-index: 10;
+            max-width: 680px;
+            margin: 1rem auto;
+            padding: 0 1rem;
+        }
+        .camera-frame {
+            position: relative;
+            background: var(--card);
+            border-radius: 24px;
+            box-shadow: 0 8px 40px var(--shadow), 0 0 0 3px var(--border);
+            overflow: hidden;
+            aspect-ratio: 4/3;
+        }
+        .camera-frame video,
+        .camera-frame canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .camera-frame canvas {
+            position: absolute;
+            top: 0; left: 0;
+        }
+
+        /* Countdown overlay */
+        .countdown-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.3);
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .countdown-overlay.active {
+            opacity: 1;
+        }
+        .countdown-number {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 8rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.3);
+            animation: countPop 0.6s ease-out;
+        }
+        @keyframes countPop {
+            0% { transform: scale(2); opacity: 0; }
+            50% { transform: scale(0.9); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Flash effect */
+        .flash-overlay {
+            position: absolute;
+            inset: 0;
+            background: white;
+            z-index: 25;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s;
+        }
+        .flash-overlay.active {
+            opacity: 0.9;
+            transition: opacity 0s;
+        }
+
+        /* Placeholder saat belum ada kamera */
+        .camera-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            background: linear-gradient(135deg, #FFF5E6, #FFE0B2);
+            z-index: 5;
+        }
+        .camera-placeholder i {
+            font-size: 4rem;
+            color: var(--accent);
+            animation: bounceIcon 2s ease-in-out infinite;
+        }
+        @keyframes bounceIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Kontrol utama */
+        .controls-main {
+            position: relative;
+            z-index: 10;
+            max-width: 680px;
+            margin: 1rem auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            border-radius: 16px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.2);
+            transform: translateX(-100%);
+            transition: transform 0.3s;
+        }
+        .btn:hover::after {
+            transform: translateX(0);
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-capture {
+            background: linear-gradient(135deg, var(--accent), #FF8E53);
+            color: white;
+            font-size: 1.1rem;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(255,107,107,0.4);
+        }
+        .btn-capture:hover {
+            box-shadow: 0 6px 30px rgba(255,107,107,0.6);
+            transform: translateY(-2px);
+        }
+        .btn-capture:active {
+            transform: scale(0.95) translateY(0);
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, var(--accent3), #38B000);
+            color: white;
+            box-shadow: 0 4px 15px rgba(107,203,119,0.3);
+        }
+        .btn-stop {
+            background: linear-gradient(135deg, #888, #666);
+            color: white;
+        }
+        .btn-flip {
+            background: var(--card);
+            color: var(--fg);
+            border: 2px solid var(--border);
+        }
+        .btn-flip:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Panel filter & stiker */
+        .panels {
+            position: relative;
+            z-index: 10;
+            max-width: 680px;
+            margin: 0.5rem auto 2rem;
+            padding: 0 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .panel {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 1rem 1.2rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            border: 2px solid var(--border);
+        }
+        .panel-title {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--fg-light);
+            margin-bottom: 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .panel-title i { color: var(--accent); }
+
+        /* Filter grid */
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 0.6rem;
+        }
+        .filter-item {
+            text-align: center;
+            cursor: pointer;
+            border-radius: 14px;
+            padding: 0.5rem 0.3rem;
+            transition: all 0.25s;
+            border: 2px solid transparent;
+        }
+        .filter-item:hover {
+            background: var(--bg);
+        }
+        .filter-item.active {
+            border-color: var(--accent);
+            background: rgba(255,107,107,0.08);
+        }
+        .filter-preview {
+            width: 60px; height: 45px;
+            border-radius: 10px;
+            margin: 0 auto 0.4rem;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #FFD4A8, #FFB088);
+        }
+        .filter-preview::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 10px;
+        }
+        .filter-item[data-filter="none"] .filter-preview::after { background: transparent; }
+        .filter-item[data-filter="grayscale"] .filter-preview::after { background: grayscale(100%); mix-blend-mode: multiply; }
+        .filter-item[data-filter="sepia"] .filter-preview::after { background: sepia(100%); mix-blend-mode: multiply; }
+        .filter-item[data-filter="invert"] .filter-preview::after { background: invert(100%); mix-blend-mode: multiply; }
+        .filter-item[data-filter="warm"] .filter-preview::after { background: linear-gradient(135deg, rgba(255,165,0,0.3), rgba(255,69,0,0.2)); }
+        .filter-item[data-filter="cool"] .filter-preview::after { background: linear-gradient(135deg, rgba(0,191,255,0.3), rgba(0,0,139,0.2)); }
+        .filter-item[data-filter="vintage"] .filter-preview::after { background: linear-gradient(135deg, rgba(210,180,140,0.4), rgba(139,90,43,0.2)); }
+        .filter-item[data-filter="pop"] .filter-preview::after { background: linear-gradient(135deg, rgba(255,0,128,0.25), rgba(255,255,0,0.25)); }
+        .filter-item[data-filter="bw"] .filter-preview::after { background: grayscale(100%) contrast(1.3); mix-blend-mode: multiply; }
+
+        .filter-name {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--fg);
+        }
+
+        /* Stiker grid */
+        .sticker-grid {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .sticker-btn {
+            width: 50px; height: 50px;
+            border-radius: 14px;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .sticker-btn:hover {
+            transform: scale(1.15);
+            border-color: var(--accent);
+        }
+        .sticker-btn.active {
+            border-color: var(--accent);
+            background: rgba(255,107,107,0.1);
+            box-shadow: 0 0 12px rgba(255,107,107,0.2);
+        }
+
+        /* Stiker yang bisa ditaruh di canvas */
+        .placed-sticker {
+            position: absolute;
+            cursor: grab;
+            user-select: none;
+            font-size: 3rem;
+            z-index: 15;
+            transition: transform 0.1s;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        .placed-sticker:active { cursor: grabbing; }
+
+        /* Galeri hasil foto */
+        .gallery-section {
+            position: relative;
+            z-index: 10;
+            max-width: 680px;
+            margin: 0 auto 3rem;
+            padding: 0 1rem;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.8rem;
+        }
+        .gallery-item {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px var(--shadow);
+            border: 2px solid var(--border);
+            aspect-ratio: 4/3;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .gallery-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+        .gallery-item img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .gallery-item-actions {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            padding: 0.4rem;
+            display: flex;
+            gap: 0.3rem;
+            background: linear-gradient(transparent, rgba(0,0,0,0.6));
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        .gallery-item:hover .gallery-item-actions {
+            opacity: 1;
+        }
+        .gallery-item-actions button {
+            flex: 1;
+            padding: 0.35rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Quicksand', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+        }
+        .gallery-item-actions .btn-dl {
+            background: var(--accent);
+            color: white;
+        }
+        .gallery-item-actions .btn-del {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .toast {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 0.8rem 1.2rem;
+            box-shadow: 0 8px 30px var(--shadow);
+            border-left: 4px solid var(--accent3);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: slideInToast 0.4s ease-out, fadeOutToast 0.4s 2.5s ease-in forwards;
+        }
+        @keyframes slideInToast {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOutToast {
+            to { transform: translateX(120%); opacity: 0; }
+        }
+
+        /* Modal preview */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 150;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(8px);
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal-content {
+            background: var(--card);
+            border-radius: 24px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .modal-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            display: block;
+        }
+        .modal-actions {
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+
+        /* Timer slider */
+        .timer-row {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--fg-light);
+        }
+        .timer-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+            height: 6px;
+        }
+
+        /* Floating decorations */
+        .float-deco {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.15;
+            font-size: 2rem;
+            animation: floatAround 15s linear infinite;
+        }
+        @keyframes floatAround {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-10vh) rotate(360deg); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .filter-grid { grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); }
+            .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+            .sticker-btn { width: 44px; height: 44px; font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Background dekorasi -->
+<div class="bg-deco"></div>
+
+<!-- Confetti canvas -->
+<canvas id="confettiCanvas"></canvas>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Modal preview -->
+<div class="modal-overlay" id="modal" role="dialog" aria-label="Preview foto">
+    <div class="modal-content">
+        <img id="modalImg" src="" alt="Preview foto">
+        <div class="modal-actions">
+            <button class="btn btn-capture" onclick="downloadModalImg()" style="font-size:0.9rem; padding:0.7rem 1.5rem;">
+                <i class="fa-solid fa-download"></i> Download
+            </button>
+            <button class="btn btn-flip" onclick="closeModal()" style="font-size:0.9rem;">
+                <i class="fa-solid fa-xmark"></i> Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Floating dekorasi -->
+<div class="float-deco" style="left:5%; animation-delay:0s;">&#x2728;</div>
+<div class="float-deco" style="left:20%; animation-delay:3s; font-size:1.5rem;">&#x1F4A5;</div>
+<div class="float-deco" style="left:45%; animation-delay:7s;">&#x2B50;</div>
+<div class="float-deco" style="left:70%; animation-delay:11s; font-size:1.8rem;">&#x1F389;</div>
+<div class="float-deco" style="left:90%; animation-delay:5s;">&#x1F308;</div>
+
+<header class="header">
+    <h1>Ponyo Booth</h1>
+    <p>Photoboot lucu langsung dari browser kamu!</p>
+</header>
+
+<main>
+    <!-- Kamera -->
+    <section class="camera-wrapper" aria-label="Area kamera">
+        <div class="camera-frame" id="cameraFrame">
+            <video id="video" autoplay playsinline muted style="transform: scaleX(-1);"></video>
+            <canvas id="overlayCanvas" style="transform: scaleX(-1);"></canvas>
+            <div class="camera-placeholder" id="placeholder">
+                <i class="fa-solid fa-camera-retro"></i>
+                <p style="color: var(--fg-light); font-weight: 600;">Klik "Mulai Kamera" untuk mulai</p>
+            </div>
+            <div class="countdown-overlay" id="countdownOverlay">
+                <span class="countdown-number" id="countdownNum">3</span>
+            </div>
+            <div class="flash-overlay" id="flashOverlay"></div>
+        </div>
+    </section>
+
+    <!-- Kontrol utama -->
+    <section class="controls-main" aria-label="Kontrol kamera">
+        <button class="btn btn-start" id="btnStart" onclick="startCamera()">
+            <i class="fa-solid fa-video"></i> Mulai Kamera
+        </button>
+        <button class="btn btn-capture" id="btnCapture" onclick="capturePhoto()" style="display:none;">
+            <i class="fa-solid fa-camera"></i> Ambil Foto
+        </button>
+        <button class="btn btn-flip" id="btnFlip" onclick="flipCamera()" style="display:none;">
+            <i class="fa-solid fa-arrows-rotate"></i> Balik
+        </button>
+    </section>
+
+    <!-- Panel filter & stiker -->
+    <section class="panels" id="panels" style="display:none;" aria-label="Filter dan stiker">
+        <!-- Timer -->
+        <div class="panel">
+            <div class="panel-title"><i class="fa-solid fa-clock"></i> Timer</div>
+            <div class="timer-row">
+                <span>Langsung</span>
+                <input type="range" id="timerSlider" min="0" max="5" value="0" step="1" oninput="updateTimerLabel()">
+                <span id="timerLabel">0 detik</span>
+            </div>
+        </div>
+
+        <!-- Filter -->
+        <div class="panel">
+            <div class="panel-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Filter</div>
+            <div class="filter-grid" id="filterGrid"></div>
+        </div>
+
+        <!-- Stiker -->
+        <div class="panel">
+            <div class="panel-title"><i class="fa-solid fa-face-grin-stars"></i> Stiker (klik lalu tempel di foto)</div>
+            <div class="sticker-grid" id="stickerGrid"></div>
+            <p style="font-size:0.72rem; color:var(--fg-light); margin-top:0.5rem;">
+                <i class="fa-solid fa-circle-info"></i> Klik stiker, lalu klik pada area foto untuk menempelkan. Seret untuk memindahkan.
+            </p>
+        </div>
+    </section>
+
+    <!-- Galeri -->
+    <section class="gallery-section" id="gallerySection" style="display:none;" aria-label="Galeri foto">
+        <div class="panel">
+            <div class="panel-title"><i class="fa-solid fa-images"></i> Galeri Foto</div>
+            <div class="gallery-grid" id="galleryGrid"></div>
+        </div>
+    </section>
+</main>
+
+<footer style="text-align:center; padding:1rem; color:var(--fg-light); font-size:0.8rem; position:relative; z-index:10;">
+    Dibuat dengan <i class="fa-solid fa-heart" style="color:var(--accent);"></i> Ponyo Booth
+</footer>
+
+<script>
+    // ====== STATE ======
+    let stream = null;
+    let currentFilter = 'none';
+    let activeSticker = null;
+    let placedStickers = [];
+    let photos = [];
+    let facingMode = 'user';
+    let isFlipped = true;
+    let animFrameId = null;
+
+    // ====== ELEMEN DOM ======
+    const video = document.getElementById('video');
+    const overlayCanvas = document.getElementById('overlayCanvas');
+    const ctx = overlayCanvas.getContext('2d');
+    const placeholder = document.getElementById('placeholder');
+    const countdownOverlay = document.getElementById('countdownOverlay');
+    const countdownNum = document.getElementById('countdownNum');
+    const flashOverlay = document.getElementById('flashOverlay');
+    const btnStart = document.getElementById('btnStart');
+    const btnCapture = document.getElementById('btnCapture');
+    const btnFlip = document.getElementById('btnFlip');
+    const panels = document.getElementById('panels');
+    const gallerySection = document.getElementById('gallerySection');
+    const galleryGrid = document.getElementById('galleryGrid');
+    const cameraFrame = document.getElementById('cameraFrame');
+
+    // ====== FILTER DEFINISI ======
+    const filters = [
+        { id: 'none', name: 'Normal', css: 'none' },
+        { id: 'grayscale', name: 'Hitam Putih', css: 'grayscale(100%)' },
+        { id: 'sepia', name: 'Sepia', css: 'sepia(80%) contrast(1.1)' },
+        { id: 'invert', name: 'Negatif', css: 'invert(100%)' },
+        { id: 'warm', name: 'Hangat', css: 'saturate(1.4) sepia(20%) brightness(1.05)' },
+        { id: 'cool', name: 'Dingin', css: 'saturate(0.9) hue-rotate(180deg) brightness(1.05)' },
+        { id: 'vintage', name: 'Vintage', css: 'sepia(40%) contrast(1.15) brightness(0.95) saturate(0.8)' },
+        { id: 'pop', name: 'Pop Art', css: 'saturate(2.5) contrast(1.3) brightness(1.1)' },
+        { id: 'bw', name: 'Film Noir', css: 'grayscale(100%) contrast(1.5) brightness(0.9)' },
+    ];
+
+    // ====== STIKER DEFINISI ======
+    const stickers = [
+        { emoji: '👑', name: 'Mahkota' },
+        { emoji: '🤡', name: 'Badut' },
+        { emoji: '🐱', name: 'Kucing' },
+        { emoji: '🐶', name: 'Anjing' },
+        { emoji: '🌈', name: 'Pelangi' },
+        { emoji: '⭐', name: 'Bintang' },
+        { emoji: '❤️', name: 'Hati' },
+        { emoji: '🦋', name: 'Kupu-kupu' },
+        { emoji: '🌸', name: 'Sakura' },
+        { emoji: '🎵', name: 'Musik' },
+        { emoji: '💀', name: 'Tengkorak' },
+        { emoji: '😎', name: 'Keren' },
+        { emoji: '🔥', name: 'Api' },
+        { emoji: '🎀', name: 'Pita' },
+        { emoji: '🧸', name: 'Boneka' },
+        { emoji: '🍕', name: 'Pizza' },
+        { emoji: '🦄', name: 'Unicorn' },
+        { emoji: '👻', name: 'Hantu' },
+    ];
+
+    // ====== INISIALISASI UI ======
+    function initFilterGrid() {
+        const grid = document.getElementById('filterGrid');
+        filters.forEach(f => {
+            const item = document.createElement('div');
+            item.className = 'filter-item' + (f.id === 'none' ? ' active' : '');
+            item.dataset.filter = f.id;
+            item.onclick = () => setFilter(f.id);
+            item.innerHTML = `
+                <div class="filter-preview"></div>
+                <div class="filter-name">${f.name}</div>
+            `;
+            grid.appendChild(item);
+        });
+    }
+
+    function initStickerGrid() {
+        const grid = document.getElementById('stickerGrid');
+        stickers.forEach(s => {
+            const btn = document.createElement('button');
+            btn.className = 'sticker-btn';
+            btn.textContent = s.emoji;
+            btn.title = s.name;
+            btn.setAttribute('aria-label', 'Stiker ' + s.name);
+            btn.onclick = () => selectSticker(s.emoji, btn);
+            grid.appendChild(btn);
+        });
+    }
+
+    // ====== KAMERA ======
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 960 } },
+                audio: false
+            });
+            video.srcObject = stream;
+            await video.play();
+
+            placeholder.style.display = 'none';
+            btnStart.style.display = 'none';
+            btnCapture.style.display = '';
+            btnFlip.style.display = '';
+            panels.style.display = '';
+
+            // Set ukuran canvas
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            showToast('Kamera aktif!', 'fa-solid fa-check');
+        } catch (err) {
+            showToast('Gagal mengakses kamera: ' + err.message, 'fa-solid fa-triangle-exclamation');
+        }
+    }
+
+    function resizeCanvas() {
+        overlayCanvas.width = video.videoWidth || 640;
+        overlayCanvas.height = video.videoHeight || 480;
+    }
+
+    function flipCamera() {
+        facingMode = facingMode === 'user' ? 'environment' : 'user';
+        isFlipped = facingMode === 'user';
+        const scaleX = isFlipped ? '-1' : '1';
+        video.style.transform = `scaleX(${scaleX})`;
+        overlayCanvas.style.transform = `scaleX(${scaleX})`;
+
+        if (stream) {
+            stream.getTracks().forEach(t => t.stop());
+        }
+        startCamera();
+    }
+
+    // ====== FILTER ======
+    function setFilter(filterId) {
+        currentFilter = filterId;
+        const filterObj = filters.find(f => f.id === filterId);
+        video.style.filter = filterObj.css;
+
+        document.querySelectorAll('.filter-item').forEach(el => {
+            el.classList.toggle('active', el.dataset.filter === filterId);
+        });
+    }
+
+    // ====== STIKER ======
+    function selectSticker(emoji, btn) {
+        if (activeSticker === emoji) {
+            activeSticker = null;
+            btn.classList.remove('active');
+            cameraFrame.style.cursor = 'default';
+        } else {
+            activeSticker = emoji;
+            document.querySelectorAll('.sticker-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            cameraFrame.style.cursor = 'crosshair';
+        }
+    }
+
+    // Klik pada area foto untuk menempel stiker
+    cameraFrame.addEventListener('click', (e) => {
+        if (!activeSticker) return;
+        // Jangan tempel jika klik di stiker yang sudah ada
+        if (e.target.classList.contains('placed-sticker')) return;
+
+        const rect = cameraFrame.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        placeSticker(activeSticker, x, y);
+    });
+
+    function placeSticker(emoji, x, y) {
+        const sticker = document.createElement('div');
+        sticker.className = 'placed-sticker';
+        sticker.textContent = emoji;
+        sticker.style.left = (x - 24) + 'px';
+        sticker.style.top = (y - 24) + 'px';
+        sticker.dataset.emoji = emoji;
+
+        // Drag functionality
+        let isDragging = false;
+        let offsetX = 0, offsetY = 0;
+
+        sticker.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            const sRect = sticker.getBoundingClientRect();
+            offsetX = e.clientX - sRect.left;
+            offsetY = e.clientY - sRect.top;
+            sticker.style.zIndex = '16';
+            e.stopPropagation();
+            e.preventDefault();
+        });
+
+        sticker.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            const touch = e.touches[0];
+            const sRect = sticker.getBoundingClientRect();
+            offsetX = touch.clientX - sRect.left;
+            offsetY = touch.clientY - sRect.top;
+            sticker.style.zIndex = '16';
+            e.stopPropagation();
+            e.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            moveSticker(sticker, e.clientX, e.clientY, offsetX, offsetY);
+        });
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            moveSticker(sticker, touch.clientX, touch.clientY, offsetX, offsetY);
+        }, { passive: false });
+
+        document.addEventListener('mouseup', () => { isDragging = false; sticker.style.zIndex = '15'; });
+        document.addEventListener('touchend', () => { isDragging = false; sticker.style.zIndex = '15'; });
+
+        // Double click untuk hapus
+        sticker.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            sticker.remove();
+            placedStickers = placedStickers.filter(s => s !== sticker);
+        });
+
+        cameraFrame.appendChild(sticker);
+        placedStickers.push(sticker);
+    }
+
+    function moveSticker(sticker, clientX, clientY, offsetX, offsetY) {
+        const rect = cameraFrame.getBoundingClientRect();
+        let newX = clientX - rect.left - offsetX;
+        let newY = clientY - rect.top - offsetY;
+        // Clamp ke dalam frame
+        newX = Math.max(0, Math.min(newX, rect.width - 48));
+        newY = Math.max(0, Math.min(newY, rect.height - 48));
+        sticker.style.left = newX + 'px';
+        sticker.style.top = newY + 'px';
+    }
+
+    // ====== TIMER ======
+    function updateTimerLabel() {
+        const val = document.getElementById('timerSlider').value;
+        document.getElementById('timerLabel').textContent = val == 0 ? 'Langsung' : val + ' detik';
+    }
+
+    // ====== CAPTURE FOTO ======
+    async function capturePhoto() {
+        if (!stream) return;
+
+        const timerVal = parseInt(document.getElementById('timerSlider').value);
+
+        if (timerVal > 0) {
+            btnCapture.disabled = true;
+            for (let i = timerVal; i > 0; i--) {
+                countdownNum.textContent = i;
+                countdownNum.style.animation = 'none';
+                void countdownNum.offsetWidth; // reflow
+                countdownNum.style.animation = 'countPop 0.6s ease-out';
+                countdownOverlay.classList.add('active');
+                await sleep(1000);
+            }
+            countdownOverlay.classList.remove('active');
+            btnCapture.disabled = false;
+        }
+
+        // Flash
+        flashOverlay.classList.add('active');
+        setTimeout(() => flashOverlay.classList.remove('active'), 200);
+
+        // Ambil gambar
+        const captureCanvas = document.createElement('canvas');
+        const cw = video.videoWidth || 640;
+        const ch = video.videoHeight || 480;
+        captureCanvas.width = cw;
+        captureCanvas.height = ch;
+        const cctx = captureCanvas.getContext('2d');
+
+        // Terapkan filter
+        const filterObj = filters.find(f => f.id === currentFilter);
+        cctx.filter = filterObj.css;
+
+        // Mirror jika menghadap user
+        if (isFlipped) {
+            cctx.translate(cw, 0);
+            cctx.scale(-1, 1);
+        }
+        cctx.drawImage(video, 0, 0, cw, ch);
+        cctx.setTransform(1, 0, 0, 1, 0, 0);
+        cctx.filter = 'none';
+
+        // Gambar stiker
+        const frameRect = cameraFrame.getBoundingClientRect();
+        const scaleX = cw / frameRect.width;
+        const scaleY = ch / frameRect.height;
+
+        placedStickers.forEach(sticker => {
+            const sLeft = parseFloat(sticker.style.left);
+            const sTop = parseFloat(sticker.style.top);
+            const sSize = 48; // ukuran stiker di DOM
+            const fontSize = Math.round(sSize * scaleX);
+
+            cctx.font = `${fontSize}px serif`;
+            cctx.textAlign = 'left';
+            cctx.textBaseline = 'top';
+
+            // Hitung posisi dengan mirror
+            let drawX = sLeft * scaleX;
+            let drawY = sTop * scaleY;
+            if (isFlipped) {
+                drawX = cw - (sLeft + sSize) * scaleX;
+            }
+
+            cctx.fillText(sticker.dataset.emoji, drawX, drawY);
+        });
+
+        // Watermark lucu
+        cctx.save();
+        cctx.font = `bold ${Math.round(cw * 0.03)}px Fredoka, sans-serif`;
+        cctx.textAlign = 'right';
+        cctx.textBaseline = 'bottom';
+        cctx.fillStyle = 'rgba(255,255,255,0.7)';
+        cctx.shadowColor = 'rgba(0,0,0,0.3)';
+        cctx.shadowBlur = 4;
+        cctx.fillText('Ponyo Booth', cw - 15, ch - 15);
+        cctx.restore();
+
+        const dataUrl = captureCanvas.toDataURL('image/png');
+        photos.push(dataUrl);
+
+        // Confetti!
+        launchConfetti();
+
+        // Update galeri
+        updateGallery();
+        showToast('Foto berhasil diambil!', 'fa-solid fa-camera');
+    }
+
+    // ====== GALERI ======
+    function updateGallery() {
+        gallerySection.style.display = '';
+        galleryGrid.innerHTML = '';
+
+        photos.forEach((dataUrl, idx) => {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.innerHTML = `
+                <img src="${dataUrl}" alt="Foto ${idx + 1}" loading="lazy">
+                <div class="gallery-item-actions">
+                    <button class="btn-dl" onclick="downloadPhoto(${idx})" aria-label="Download foto ${idx + 1}">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+                    <button class="btn-del" onclick="deletePhoto(${idx})" aria-label="Hapus foto ${idx + 1}">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            item.querySelector('img').onclick = () => openModal(dataUrl);
+            galleryGrid.appendChild(item);
+        });
+    }
+
+    function downloadPhoto(idx) {
+        const a = document.createElement('a');
+        a.href = photos[idx];
+        a.download = `ponyo-booth-${Date.now()}.png`;
+        a.click();
+        showToast('Foto didownload!', 'fa-solid fa-download');
+    }
+
+    function deletePhoto(idx) {
+        photos.splice(idx, 1);
+        updateGallery();
+        if (photos.length === 0) gallerySection.style.display = 'none';
+        showToast('Foto dihapus', 'fa-solid fa-trash');
+    }
+
+    // ====== MODAL ======
+    function openModal(src) {
+        document.getElementById('modalImg').src = src;
+        document.getElementById('modal').classList.add('active');
+    }
+    function closeModal() {
+        document.getElementById('modal').classList.remove('active');
+    }
+    function downloadModalImg() {
+        const src = document.getElementById('modalImg').src;
+        const a = document.createElement('a');
+        a.href = src;
+        a.download = `ponyo-booth-${Date.now()}.png`;
+        a.click();
+    }
+    document.getElementById('modal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeModal();
+    });
+
+    // ====== TOAST ======
+    function showToast(msg, icon) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<i class="${icon}" style="color:var(--accent3);"></i> ${msg}`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ====== CONFETTI ======
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    const cCtx = confettiCanvas.getContext('2d');
+    let confettiPieces = [];
+    let confettiRunning = false;
+
+    function resizeConfetti() {
+        confettiCanvas.width = window.innerWidth;
+        confettiCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeConfetti);
+    resizeConfetti();
+
+    function launchConfetti() {
+        confettiPieces = [];
+        const colors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FF8E53', '#E040FB', '#00E5FF'];
+
+        for (let i = 0; i < 120; i++) {
+            confettiPieces.push({
+                x: Math.random() * confettiCanvas.width,
+                y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+                w: Math.random() * 10 + 5,
+                h: Math.random() * 6 + 3,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                vx: (Math.random() - 0.5) * 4,
+                vy: Math.random() * 3 + 2,
+                rotation: Math.random() * 360,
+                rotSpeed: (Math.random() - 0.5) * 10,
+                opacity: 1,
+            });
+        }
+
+        if (!confettiRunning) {
+            confettiRunning = true;
+            animateConfetti();
+        }
+    }
+
+    function animateConfetti() {
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        let alive = false;
+
+        confettiPieces.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.rotation += p.rotSpeed;
+            p.vy += 0.05;
+            if (p.y > confettiCanvas.height - 50) {
+                p.opacity -= 0.02;
+            }
+
+            if (p.opacity > 0) {
+                alive = true;
+                cCtx.save();
+                cCtx.globalAlpha = Math.max(0, p.opacity);
+                cCtx.translate(p.x, p.y);
+                cCtx.rotate((p.rotation * Math.PI) / 180);
+                cCtx.fillStyle = p.color;
+                cCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                cCtx.restore();
+            }
+        });
+
+        if (alive) {
+            requestAnimationFrame(animateConfetti);
+        } else {
+            confettiRunning = false;
+            cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        }
+    }
+
+    // ====== UTILS ======
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // ====== KEYBOARD SUPPORT ======
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && stream) {
+            e.preventDefault();
+            capturePhoto();
+        }
+        if (e.code === 'Escape') {
+            closeModal();
+        }
+    });
+
+    // ====== INIT ======
+    initFilterGrid();
+    initStickerGrid();
+</script>
+</body>
+</html>
