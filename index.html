@@ -20,6 +20,7 @@
             --card: #FFFFFF;
             --border: #FFD4A8;
             --shadow: rgba(61, 44, 30, 0.1);
+            --gold: #D4AF37;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -31,55 +32,247 @@
         }
         h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 
+        /* ===== Background dekorasi ===== */
         .bg-deco {
             position: fixed; inset: 0;
             pointer-events: none; z-index: 0; overflow: hidden;
         }
         .bg-deco::before {
             content: ''; position: absolute;
-            width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(255,107,107,0.12) 0%, transparent 70%);
-            top: -50px; right: -50px; border-radius: 50%;
-            animation: floatBlob 8s ease-in-out infinite;
+            width: 350px; height: 350px;
+            background: radial-gradient(circle, rgba(255,107,107,0.1) 0%, transparent 70%);
+            top: -80px; right: -80px; border-radius: 50%;
+            animation: floatBlob 9s ease-in-out infinite;
         }
         .bg-deco::after {
             content: ''; position: absolute;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(255,217,61,0.1) 0%, transparent 70%);
-            bottom: -100px; left: -100px; border-radius: 50%;
-            animation: floatBlob 10s ease-in-out infinite reverse;
+            width: 450px; height: 450px;
+            background: radial-gradient(circle, rgba(255,217,61,0.08) 0%, transparent 70%);
+            bottom: -120px; left: -120px; border-radius: 50%;
+            animation: floatBlob 11s ease-in-out infinite reverse;
         }
         @keyframes floatBlob {
             0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(30px, -20px) scale(1.1); }
+            50% { transform: translate(25px, -18px) scale(1.08); }
         }
 
-        #confettiCanvas {
+        #confettiCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
+
+        /* ===== Toast ===== */
+        .toast-container {
+            position: fixed; top: 1rem; right: 1rem;
+            z-index: 200; display: flex; flex-direction: column; gap: 0.5rem;
+        }
+        .toast {
+            background: var(--card); border-radius: 14px;
+            padding: 0.7rem 1.1rem;
+            box-shadow: 0 8px 30px var(--shadow);
+            border-left: 4px solid var(--accent3);
+            font-weight: 600; font-size: 0.85rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            animation: slideInToast 0.4s ease-out, fadeOutToast 0.4s 2.5s ease-in forwards;
+        }
+        @keyframes slideInToast {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOutToast {
+            to { transform: translateX(120%); opacity: 0; }
+        }
+
+        /* ===== Modal ===== */
+        .modal-overlay {
             position: fixed; inset: 0;
-            pointer-events: none; z-index: 100;
+            background: rgba(0,0,0,0.7); z-index: 150;
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s; backdrop-filter: blur(8px);
         }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content {
+            background: var(--card); border-radius: 24px;
+            max-width: 90vw; max-height: 90vh;
+            overflow: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: scale(0.9); transition: transform 0.3s;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-content img { max-width: 100%; display: block; border-radius: 20px 20px 0 0; }
+        .modal-actions { padding: 0.8rem; display: flex; justify-content: center; gap: 0.6rem; }
 
-        .header {
+        /* ===== Halaman Template ===== */
+        .template-screen {
             position: relative; z-index: 10;
-            text-align: center; padding: 1.5rem 1rem 0.5rem;
+            max-width: 560px; margin: 0 auto;
+            padding: 2rem 1rem 3rem;
+            transition: opacity 0.5s, transform 0.5s;
         }
-        .header h1 {
-            font-size: clamp(2rem, 6vw, 3.5rem);
+        .template-screen.hidden {
+            opacity: 0; transform: translateY(-30px);
+            pointer-events: none; position: absolute;
+            left: 50%; transform: translateX(-50%) translateY(-30px);
+        }
+        .template-header {
+            text-align: center; margin-bottom: 2rem;
+        }
+        .template-header h1 {
+            font-size: clamp(2.2rem, 7vw, 3.8rem);
             font-weight: 700;
             background: linear-gradient(135deg, var(--accent), #FF8E53, var(--accent2));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: -1px;
         }
-        .header p {
-            color: var(--fg-light);
-            font-size: 1.05rem; margin-top: 0.2rem; font-weight: 500;
+        .template-header p {
+            color: var(--fg-light); font-size: 1.05rem;
+            margin-top: 0.3rem; font-weight: 500;
         }
 
-        .camera-wrapper {
+        .selection-section {
+            margin-bottom: 1.8rem;
+        }
+        .selection-label {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600; font-size: 1rem;
+            color: var(--fg); margin-bottom: 0.7rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .selection-label i { color: var(--accent); font-size: 0.9rem; }
+
+        .option-grid {
+            display: grid; gap: 0.7rem;
+        }
+        .option-grid.cols-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+        .option-grid.cols-3 {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .option-card {
+            background: var(--card);
+            border: 3px solid var(--border);
+            border-radius: 18px;
+            padding: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .option-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,107,107,0.05), rgba(255,217,61,0.05));
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .option-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+        .option-card:hover::before { opacity: 1; }
+        .option-card.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255,107,107,0.15), 0 8px 25px var(--shadow);
+        }
+        .option-card.selected::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute; top: 6px; right: 8px;
+            font-size: 0.7rem;
+            background: var(--accent); color: white;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            animation: popIn 0.3s ease-out;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            60% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .option-preview {
+            width: 100%; aspect-ratio: 4/3;
+            border-radius: 12px; margin-bottom: 0.5rem;
+            position: relative; overflow: hidden;
+            background: var(--bg);
+        }
+        .option-name {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600; font-size: 0.85rem;
+            color: var(--fg);
+        }
+        .option-desc {
+            font-size: 0.7rem; color: var(--fg-light);
+            margin-top: 0.15rem; font-weight: 500;
+        }
+
+        /* Mini preview canvas di option card */
+        .option-preview canvas {
+            width: 100%; height: 100%;
+            display: block; border-radius: 12px;
+        }
+
+        .btn-start-big {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700; border: none; cursor: pointer;
+            border-radius: 50px;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            display: flex; align-items: center; justify-content: center;
+            gap: 0.6rem; margin: 2rem auto 0;
+            background: linear-gradient(135deg, var(--accent), #FF8E53);
+            color: white;
+            box-shadow: 0 6px 30px rgba(255,107,107,0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; overflow: hidden;
+            width: 100%; max-width: 320px;
+        }
+        .btn-start-big::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%); transition: transform 0.4s;
+        }
+        .btn-start-big:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(255,107,107,0.5);
+        }
+        .btn-start-big:hover::after { transform: translateX(0); }
+        .btn-start-big:active { transform: scale(0.97); }
+
+        /* ===== Halaman Kamera ===== */
+        .camera-screen {
             position: relative; z-index: 10;
-            max-width: 680px; margin: 0.8rem auto; padding: 0 1rem;
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        .camera-screen.hidden {
+            opacity: 0; transform: translateY(30px);
+            pointer-events: none; position: absolute;
+            left: 0; right: 0;
+        }
+        .cam-header {
+            text-align: center; padding: 1rem 1rem 0.3rem;
+            display: flex; align-items: center; justify-content: center; gap: 0.8rem;
+        }
+        .cam-header h2 {
+            font-size: 1.3rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #FF8E53);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .btn-back {
+            background: var(--card); border: 2px solid var(--border);
+            color: var(--fg); border-radius: 12px;
+            padding: 0.4rem 0.7rem; cursor: pointer;
+            font-size: 0.8rem; font-family: 'Quicksand', sans-serif;
+            font-weight: 700; transition: all 0.2s;
+            display: flex; align-items: center; gap: 0.3rem;
+        }
+        .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+        .camera-wrapper {
+            max-width: 680px; margin: 0.5rem auto; padding: 0 1rem;
         }
         .camera-frame {
             position: relative; background: var(--card);
@@ -92,9 +285,7 @@
             width: 100%; height: 100%;
             object-fit: cover; display: block;
         }
-        .camera-frame canvas {
-            position: absolute; top: 0; left: 0;
-        }
+        .camera-frame canvas { position: absolute; top: 0; left: 0; }
 
         .countdown-overlay {
             position: absolute; inset: 0;
@@ -107,7 +298,7 @@
         .countdown-overlay.active { opacity: 1; }
         .countdown-number {
             font-family: 'Fredoka', sans-serif;
-            font-size: 8rem; font-weight: 700; color: white;
+            font-size: 7rem; font-weight: 700; color: white;
             text-shadow: 0 4px 30px rgba(0,0,0,0.3);
             animation: countPop 0.6s ease-out;
         }
@@ -121,7 +312,6 @@
             50% { transform: scale(0.85); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
         }
-
         .flash-overlay {
             position: absolute; inset: 0;
             background: white; z-index: 25;
@@ -136,7 +326,7 @@
             background: linear-gradient(135deg, #FFF5E6, #FFE0B2); z-index: 5;
         }
         .camera-placeholder i {
-            font-size: 4rem; color: var(--accent);
+            font-size: 3.5rem; color: var(--accent);
             animation: bounceIcon 2s ease-in-out infinite;
         }
         @keyframes bounceIcon {
@@ -145,8 +335,7 @@
         }
 
         .controls-main {
-            position: relative; z-index: 10;
-            max-width: 680px; margin: 0.8rem auto; padding: 0 1rem;
+            max-width: 680px; margin: 0.6rem auto; padding: 0 1rem;
             display: flex; justify-content: center;
             gap: 0.7rem; flex-wrap: wrap;
         }
@@ -166,31 +355,23 @@
         }
         .btn:hover::after { transform: translateX(0); }
         .btn:active { transform: scale(0.95); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
         .btn:disabled::after { display: none; }
-
         .btn-capture {
             background: linear-gradient(135deg, var(--accent), #FF8E53);
             color: white; font-size: 1.1rem;
-            padding: 0.9rem 2.2rem; border-radius: 50px;
+            padding: 0.85rem 2rem; border-radius: 50px;
             box-shadow: 0 4px 20px rgba(255,107,107,0.4);
         }
         .btn-capture:hover:not(:disabled) {
             box-shadow: 0 6px 30px rgba(255,107,107,0.6);
             transform: translateY(-2px);
         }
-        .btn-start {
-            background: linear-gradient(135deg, var(--accent3), #38B000);
-            color: white; box-shadow: 0 4px 15px rgba(107,203,119,0.3);
-        }
         .btn-flip {
             background: var(--card); color: var(--fg);
             border: 2px solid var(--border);
         }
         .btn-flip:hover { border-color: var(--accent); color: var(--accent); }
-        .btn-small {
-            padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 12px;
-        }
         .btn-outline {
             background: transparent; color: var(--fg);
             border: 2px solid var(--border);
@@ -200,67 +381,55 @@
             background: rgba(255,107,107,0.08);
             color: var(--accent);
         }
+        .btn-small { padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 12px; }
 
         .panels {
-            position: relative; z-index: 10;
-            max-width: 680px; margin: 0.5rem auto 2rem;
+            max-width: 680px; margin: 0.4rem auto 2rem;
             padding: 0 1rem;
-            display: flex; flex-direction: column; gap: 0.8rem;
+            display: flex; flex-direction: column; gap: 0.7rem;
         }
         .panel {
             background: var(--card); border-radius: 20px;
-            padding: 0.9rem 1.1rem;
+            padding: 0.85rem 1rem;
             box-shadow: 0 4px 20px var(--shadow);
             border: 2px solid var(--border);
         }
         .panel-title {
             font-family: 'Fredoka', sans-serif;
-            font-weight: 600; font-size: 0.9rem;
-            color: var(--fg-light); margin-bottom: 0.6rem;
+            font-weight: 600; font-size: 0.88rem;
+            color: var(--fg-light); margin-bottom: 0.5rem;
             display: flex; align-items: center; gap: 0.5rem;
         }
         .panel-title i { color: var(--accent); }
 
-        /* Mode & Template selector */
-        .selector-row {
-            display: flex; gap: 0.5rem; flex-wrap: wrap;
-        }
-
-        /* Timer */
         .timer-row {
             display: flex; align-items: center;
-            gap: 0.8rem; font-size: 0.85rem;
+            gap: 0.8rem; font-size: 0.82rem;
             font-weight: 600; color: var(--fg-light);
         }
         .timer-row input[type="range"] {
             flex: 1; accent-color: var(--accent); height: 6px;
         }
 
-        /* Filter grid */
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
             gap: 0.5rem;
         }
         .filter-item {
             text-align: center; cursor: pointer;
-            border-radius: 14px; padding: 0.4rem 0.2rem;
+            border-radius: 14px; padding: 0.35rem 0.2rem;
             transition: all 0.25s; border: 2px solid transparent;
         }
         .filter-item:hover { background: var(--bg); }
-        .filter-item.active {
-            border-color: var(--accent);
-            background: rgba(255,107,107,0.08);
-        }
+        .filter-item.active { border-color: var(--accent); background: rgba(255,107,107,0.08); }
         .filter-preview {
-            width: 56px; height: 42px;
+            width: 54px; height: 40px;
             border-radius: 10px; margin: 0 auto 0.3rem;
             overflow: hidden; position: relative;
             background: linear-gradient(135deg, #FFD4A8, #FFB088);
         }
-        .filter-preview::after {
-            content: ''; position: absolute; inset: 0; border-radius: 10px;
-        }
+        .filter-preview::after { content: ''; position: absolute; inset: 0; border-radius: 10px; }
         .filter-item[data-filter="none"] .filter-preview::after { background: transparent; }
         .filter-item[data-filter="grayscale"] .filter-preview::after { background: grayscale(100%); mix-blend-mode: multiply; }
         .filter-item[data-filter="sepia"] .filter-preview::after { background: sepia(100%); mix-blend-mode: multiply; }
@@ -270,15 +439,14 @@
         .filter-item[data-filter="vintage"] .filter-preview::after { background: linear-gradient(135deg, rgba(210,180,140,0.4), rgba(139,90,43,0.2)); }
         .filter-item[data-filter="pop"] .filter-preview::after { background: linear-gradient(135deg, rgba(255,0,128,0.25), rgba(255,255,0,0.25)); }
         .filter-item[data-filter="bw"] .filter-preview::after { background: grayscale(100%) contrast(1.3); mix-blend-mode: multiply; }
-        .filter-name { font-size: 0.7rem; font-weight: 600; color: var(--fg); }
+        .filter-name { font-size: 0.68rem; font-weight: 600; color: var(--fg); }
 
-        /* Stiker grid */
         .sticker-grid { display: flex; gap: 0.4rem; flex-wrap: wrap; }
         .sticker-btn {
-            width: 46px; height: 46px;
+            width: 44px; height: 44px;
             border-radius: 12px; border: 2px solid var(--border);
             background: var(--bg); cursor: pointer;
-            font-size: 1.4rem; display: flex;
+            font-size: 1.3rem; display: flex;
             align-items: center; justify-content: center;
             transition: all 0.2s;
         }
@@ -289,7 +457,6 @@
             box-shadow: 0 0 12px rgba(255,107,107,0.2);
         }
 
-        /* Stiker yang ditempel di frame */
         .placed-sticker {
             position: absolute; cursor: grab;
             user-select: none; z-index: 15;
@@ -297,13 +464,8 @@
             touch-action: none;
         }
         .placed-sticker:active { cursor: grabbing; }
-        .placed-sticker .sticker-emoji {
-            display: block;
-            line-height: 1;
-        }
-        .placed-sticker.selected .sticker-controls {
-            opacity: 1; pointer-events: auto;
-        }
+        .placed-sticker .sticker-emoji { display: block; line-height: 1; }
+        .placed-sticker.selected .sticker-controls { opacity: 1; pointer-events: auto; }
         .sticker-controls {
             position: absolute; top: -30px; right: -8px;
             display: flex; gap: 3px;
@@ -314,15 +476,12 @@
             width: 24px; height: 24px;
             border-radius: 50%; border: none;
             background: white; color: var(--fg);
-            font-size: 0.65rem; cursor: pointer;
+            font-size: 0.6rem; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             transition: all 0.15s;
         }
-        .sticker-ctrl-btn:hover {
-            background: var(--accent); color: white;
-            transform: scale(1.15);
-        }
+        .sticker-ctrl-btn:hover { background: var(--accent); color: white; transform: scale(1.15); }
         .sticker-resize-handle {
             position: absolute; bottom: -6px; right: -6px;
             width: 18px; height: 18px;
@@ -330,13 +489,9 @@
             border: 2px solid var(--accent);
             cursor: nwse-resize; z-index: 17;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            transition: transform 0.15s;
         }
-        .sticker-resize-handle:hover { transform: scale(1.2); }
 
-        /* Galeri */
         .gallery-section {
-            position: relative; z-index: 10;
             max-width: 680px; margin: 0 auto 3rem; padding: 0 1rem;
         }
         .gallery-grid {
@@ -351,14 +506,8 @@
             cursor: pointer; transition: all 0.3s;
         }
         .gallery-item.multi-item { aspect-ratio: auto; }
-        .gallery-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px var(--shadow);
-        }
-        .gallery-item img {
-            width: 100%; height: 100%;
-            object-fit: cover; display: block;
-        }
+        .gallery-item:hover { transform: translateY(-4px); box-shadow: 0 8px 25px var(--shadow); }
+        .gallery-item img { width: 100%; object-fit: cover; display: block; }
         .gallery-item-actions {
             position: absolute; bottom: 0; left: 0; right: 0;
             padding: 0.4rem; display: flex; gap: 0.3rem;
@@ -377,55 +526,9 @@
         .btn-dl { background: var(--accent); color: white; }
         .btn-del { background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(4px); }
 
-        /* Toast */
-        .toast-container {
-            position: fixed; top: 1rem; right: 1rem;
-            z-index: 200; display: flex;
-            flex-direction: column; gap: 0.5rem;
-        }
-        .toast {
-            background: var(--card); border-radius: 14px;
-            padding: 0.7rem 1.1rem;
-            box-shadow: 0 8px 30px var(--shadow);
-            border-left: 4px solid var(--accent3);
-            font-weight: 600; font-size: 0.85rem;
-            display: flex; align-items: center; gap: 0.5rem;
-            animation: slideInToast 0.4s ease-out, fadeOutToast 0.4s 2.5s ease-in forwards;
-        }
-        @keyframes slideInToast {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes fadeOutToast {
-            to { transform: translateX(120%); opacity: 0; }
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.7); z-index: 150;
-            display: flex; align-items: center; justify-content: center;
-            padding: 1rem; opacity: 0; pointer-events: none;
-            transition: opacity 0.3s; backdrop-filter: blur(8px);
-        }
-        .modal-overlay.active { opacity: 1; pointer-events: all; }
-        .modal-content {
-            background: var(--card); border-radius: 24px;
-            max-width: 90vw; max-height: 90vh;
-            overflow: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            transform: scale(0.9); transition: transform 0.3s;
-        }
-        .modal-overlay.active .modal-content { transform: scale(1); }
-        .modal-content img { max-width: 100%; display: block; border-radius: 20px 20px 0 0; }
-        .modal-actions {
-            padding: 0.8rem; display: flex;
-            justify-content: center; gap: 0.6rem;
-        }
-
-        /* Floating deco */
         .float-deco {
             position: fixed; pointer-events: none;
-            z-index: 1; opacity: 0.12; font-size: 2rem;
+            z-index: 1; opacity: 0.1; font-size: 2rem;
             animation: floatAround 18s linear infinite;
         }
         @keyframes floatAround {
@@ -433,28 +536,14 @@
             100% { transform: translateY(-10vh) rotate(360deg); }
         }
 
-        /* Template preview */
-        .tpl-preview {
-            width: 56px; height: 42px;
-            border-radius: 8px; border: 2px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.55rem; font-weight: 700;
-            color: var(--fg-light); transition: all 0.2s;
-            position: relative; overflow: hidden;
-        }
-        .tpl-preview.grid2x2 {
-            background: linear-gradient(135deg, #fff3 0%, #fff3 100%);
-            display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 3px;
-        }
-        .tpl-preview.grid2x2 span {
-            background: var(--border); border-radius: 2px;
-        }
-        .tpl-preview.strip {
-            background: linear-gradient(135deg, #fff3 0%, #fff3 100%);
-            display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 2px; padding: 3px;
-        }
-        .tpl-preview.strip span {
-            background: var(--border); border-radius: 2px;
+        /* Info badge di halaman kamera */
+        .info-badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: rgba(255,107,107,0.1);
+            border: 1px solid rgba(255,107,107,0.2);
+            border-radius: 20px; padding: 0.25rem 0.7rem;
+            font-size: 0.72rem; font-weight: 700;
+            color: var(--accent); font-family: 'Fredoka', sans-serif;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -464,11 +553,12 @@
             }
         }
         @media (max-width: 640px) {
-            .filter-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
+            .filter-grid { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); }
             .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
-            .sticker-btn { width: 40px; height: 40px; font-size: 1.2rem; }
-            .btn-capture { padding: 0.8rem 1.8rem; font-size: 1rem; }
-            .header { padding: 1rem 1rem 0.3rem; }
+            .sticker-btn { width: 40px; height: 40px; font-size: 1.15rem; }
+            .btn-capture { padding: 0.75rem 1.6rem; font-size: 1rem; }
+            .option-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+            .option-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
         }
     </style>
 </head>
@@ -500,20 +590,82 @@
 <div class="float-deco" style="left:72%;animation-delay:12s;font-size:1.8rem;">&#x1F389;</div>
 <div class="float-deco" style="left:92%;animation-delay:6s;">&#x1F308;</div>
 
-<header class="header">
-    <h1>Ponyo Booth</h1>
-    <p>Photoboot lucu langsung dari browser kamu!</p>
-</header>
+<!-- ============================================ -->
+<!-- HALAMAN 1: TEMPLATE SELECTION                -->
+<!-- ============================================ -->
+<section class="template-screen" id="templateScreen">
+    <div class="template-header">
+        <h1>Ponyo Booth</h1>
+        <p>Pilih template dulu, lalu mulai foto!</p>
+    </div>
 
-<main>
-    <!-- Kamera -->
-    <section class="camera-wrapper" aria-label="Area kamera">
+    <!-- Pilihan Template -->
+    <div class="selection-section">
+        <div class="selection-label">
+            <i class="fa-solid fa-table-cells"></i> Pilih Template
+        </div>
+        <div class="option-grid cols-2" id="templateOptions">
+            <div class="option-card selected" data-tpl="grid2x2" onclick="selectTemplate('grid2x2')">
+                <div class="option-preview"><canvas id="prevGrid"></canvas></div>
+                <div class="option-name">Grid 2x2</div>
+                <div class="option-desc">4 foto dalam satu frame</div>
+            </div>
+            <div class="option-card" data-tpl="strip" onclick="selectTemplate('strip')">
+                <div class="option-preview"><canvas id="prevStrip"></canvas></div>
+                <div class="option-name">Strip</div>
+                <div class="option-desc">Photobooth klasik vertikal</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pilihan Frame -->
+    <div class="selection-section">
+        <div class="selection-label">
+            <i class="fa-solid fa-palette"></i> Pilih Frame
+        </div>
+        <div class="option-grid cols-3" id="frameOptions">
+            <div class="option-card selected" data-frame="default" onclick="selectFrame('default')">
+                <div class="option-preview"><canvas id="prevDefault"></canvas></div>
+                <div class="option-name">Default</div>
+                <div class="option-desc">Clean & simpel</div>
+            </div>
+            <div class="option-card" data-frame="birthday" onclick="selectFrame('birthday')">
+                <div class="option-preview"><canvas id="prevBirthday"></canvas></div>
+                <div class="option-name">Birthday</div>
+                <div class="option-desc">Warna cerah</div>
+            </div>
+            <div class="option-card" data-frame="graduation" onclick="selectFrame('graduation')">
+                <div class="option-preview"><canvas id="prevGrad"></canvas></div>
+                <div class="option-name">Graduation</div>
+                <div class="option-desc">Hitam & emas</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-start-big" onclick="startSession()">
+        <i class="fa-solid fa-camera"></i> Mulai Foto
+    </button>
+</section>
+
+<!-- ============================================ -->
+<!-- HALAMAN 2: KAMERA & CAPTURE                 -->
+<!-- ============================================ -->
+<section class="camera-screen hidden" id="cameraScreen">
+    <div class="cam-header">
+        <button class="btn-back" onclick="backToTemplate()">
+            <i class="fa-solid fa-arrow-left"></i> Ubah
+        </button>
+        <h2>Ponyo Booth</h2>
+        <span class="info-badge" id="infoBadge">Grid 2x2</span>
+    </div>
+
+    <div class="camera-wrapper">
         <div class="camera-frame" id="cameraFrame">
             <video id="video" autoplay playsinline muted style="transform:scaleX(-1);"></video>
             <canvas id="overlayCanvas" style="transform:scaleX(-1);"></canvas>
             <div class="camera-placeholder" id="placeholder">
                 <i class="fa-solid fa-camera-retro"></i>
-                <p style="color:var(--fg-light);font-weight:600;">Klik "Mulai Kamera" untuk mulai</p>
+                <p style="color:var(--fg-light);font-weight:600;font-size:0.9rem;">Memulai kamera...</p>
             </div>
             <div class="countdown-overlay" id="countdownOverlay">
                 <span class="countdown-number" id="countdownNum">3</span>
@@ -521,97 +673,52 @@
             </div>
             <div class="flash-overlay" id="flashOverlay"></div>
         </div>
-    </section>
+    </div>
 
-    <!-- Kontrol utama -->
-    <section class="controls-main" aria-label="Kontrol kamera">
-        <button class="btn btn-start" id="btnStart" onclick="startCamera()">
-            <i class="fa-solid fa-video"></i> Mulai Kamera
-        </button>
-        <button class="btn btn-capture" id="btnCapture" onclick="handleCapture()" style="display:none;">
+    <div class="controls-main">
+        <button class="btn btn-capture" id="btnCapture" onclick="handleCapture()">
             <i class="fa-solid fa-camera"></i> <span id="captureBtnText">Ambil Foto</span>
         </button>
-        <button class="btn btn-flip" id="btnFlip" onclick="flipCamera()" style="display:none;">
+        <button class="btn btn-flip" id="btnFlip" onclick="flipCamera()">
             <i class="fa-solid fa-arrows-rotate"></i> Balik
         </button>
-    </section>
+    </div>
 
-    <!-- Panel pengaturan -->
-    <section class="panels" id="panels" style="display:none;" aria-label="Pengaturan">
-        <!-- Mode & Template -->
-        <div class="panel">
-            <div class="panel-title"><i class="fa-solid fa-sliders"></i> Mode & Template</div>
-            <div style="display:flex;flex-direction:column;gap:0.6rem;">
-                <div>
-                    <div style="font-size:0.78rem;font-weight:700;color:var(--fg-light);margin-bottom:0.3rem;">Mode Foto</div>
-                    <div class="selector-row" id="modeSelector">
-                        <button class="btn btn-outline btn-small active" data-mode="single" onclick="setMode('single')">
-                            <i class="fa-solid fa-image"></i> Single
-                        </button>
-                        <button class="btn btn-outline btn-small" data-mode="multi" onclick="setMode('multi')">
-                            <i class="fa-solid fa-images"></i> Multi-shot (4x)
-                        </button>
-                    </div>
-                </div>
-                <div id="templateRow">
-                    <div style="font-size:0.78rem;font-weight:700;color:var(--fg-light);margin-bottom:0.3rem;">Template Frame</div>
-                    <div class="selector-row" id="templateSelector">
-                        <button class="btn btn-outline btn-small active" data-tpl="none" onclick="setTemplate('none')">
-                            Tanpa Frame
-                        </button>
-                        <button class="btn btn-outline btn-small" data-tpl="grid2x2" onclick="setTemplate('grid2x2')">
-                            <span style="display:inline-flex;gap:2px;"><span style="width:8px;height:8px;background:var(--border);border-radius:1px;display:block;"></span><span style="width:8px;height:8px;background:var(--border);border-radius:1px;display:block;"></span></span> Grid 2x2
-                        </button>
-                        <button class="btn btn-outline btn-small" data-tpl="strip" onclick="setTemplate('strip')">
-                            <span style="display:inline-flex;gap:2px;"><span style="width:5px;height:10px;background:var(--border);border-radius:1px;display:block;"></span><span style="width:5px;height:10px;background:var(--border);border-radius:1px;display:block;"></span><span style="width:5px;height:10px;background:var(--border);border-radius:1px;display:block;"></span><span style="width:5px;height:10px;background:var(--border);border-radius:1px;display:block;"></span></span> Strip
-                        </button>
-                        <button class="btn btn-outline btn-small" data-tpl="birthday" onclick="setTemplate('birthday')">
-                            <i class="fa-solid fa-cake-candles" style="font-size:0.75rem;"></i> Birthday
-                        </button>
-                        <button class="btn btn-outline btn-small" data-tpl="graduation" onclick="setTemplate('graduation')">
-                            <i class="fa-solid fa-graduation-cap" style="font-size:0.75rem;"></i> Wisuda
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+    <div class="panels">
         <!-- Timer -->
         <div class="panel">
             <div class="panel-title"><i class="fa-solid fa-clock"></i> Timer</div>
             <div class="timer-row">
                 <span>Langsung</span>
-                <input type="range" id="timerSlider" min="0" max="5" value="0" step="1" oninput="updateTimerLabel()">
-                <span id="timerLabel">0 detik</span>
+                <input type="range" id="timerSlider" min="0" max="5" value="3" step="1" oninput="updateTimerLabel()">
+                <span id="timerLabel">3 detik</span>
             </div>
         </div>
-
         <!-- Filter -->
         <div class="panel">
             <div class="panel-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Filter</div>
             <div class="filter-grid" id="filterGrid"></div>
         </div>
-
         <!-- Stiker -->
         <div class="panel">
             <div class="panel-title"><i class="fa-solid fa-face-grin-stars"></i> Stiker</div>
             <div class="sticker-grid" id="stickerGrid"></div>
-            <p style="font-size:0.7rem;color:var(--fg-light);margin-top:0.4rem;">
-                <i class="fa-solid fa-circle-info"></i> Klik stiker lalu klik foto untuk menempel. Seret untuk pindah. Gunakan tombol untuk resize/rotate. Double-klik untuk hapus.
+            <p style="font-size:0.68rem;color:var(--fg-light);margin-top:0.4rem;">
+                <i class="fa-solid fa-circle-info"></i> Klik stiker lalu klik foto. Seret untuk pindah. Tombol untuk resize/rotate. Double-klik hapus.
             </p>
         </div>
-    </section>
+    </div>
 
     <!-- Galeri -->
-    <section class="gallery-section" id="gallerySection" style="display:none;" aria-label="Galeri foto">
+    <div class="gallery-section" id="gallerySection" style="display:none;">
         <div class="panel">
             <div class="panel-title"><i class="fa-solid fa-images"></i> Galeri Foto</div>
             <div class="gallery-grid" id="galleryGrid"></div>
         </div>
-    </section>
-</main>
+    </div>
+</section>
 
-<footer style="text-align:center;padding:1rem;color:var(--fg-light);font-size:0.8rem;position:relative;z-index:10;">
+<footer style="text-align:center;padding:1rem;color:var(--fg-light);font-size:0.78rem;position:relative;z-index:10;">
     Dibuat dengan <i class="fa-solid fa-heart" style="color:var(--accent);"></i> Ponyo Booth
 </footer>
 
@@ -624,14 +731,17 @@ let placedStickers = [];
 let photos = [];
 let facingMode = 'user';
 let isFlipped = true;
-let captureMode = 'single'; // 'single' | 'multi'
-let currentTemplate = 'none'; // 'none' | 'grid2x2' | 'strip' | 'birthday' | 'graduation'
 let isCapturing = false;
 let selectedStickerEl = null;
 let multiShotImages = [];
 let stickerIdCounter = 0;
 
-// ====== ELEMEN DOM ======
+// State pilihan user di halaman template
+let selectedTemplate = 'grid2x2';
+let selectedFrame = 'default';
+let shotMode = 'multi'; // otomatis multi karena template grid/strip
+
+// ====== DOM ======
 const video = document.getElementById('video');
 const overlayCanvas = document.getElementById('overlayCanvas');
 const ctx = overlayCanvas.getContext('2d');
@@ -640,83 +750,57 @@ const countdownOverlay = document.getElementById('countdownOverlay');
 const countdownNum = document.getElementById('countdownNum');
 const countdownSub = document.getElementById('countdownSub');
 const flashOverlay = document.getElementById('flashOverlay');
-const btnStart = document.getElementById('btnStart');
 const btnCapture = document.getElementById('btnCapture');
 const btnFlip = document.getElementById('btnFlip');
-const panels = document.getElementById('panels');
 const gallerySection = document.getElementById('gallerySection');
 const galleryGrid = document.getElementById('galleryGrid');
 const cameraFrame = document.getElementById('cameraFrame');
 const captureBtnText = document.getElementById('captureBtnText');
+const infoBadge = document.getElementById('infoBadge');
 
 // ====== AUDIO (Web Audio API) ======
 let audioCtx = null;
 function getAudioCtx() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     return audioCtx;
 }
-
 function playBeep() {
     try {
-        const ctx = getAudioCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.value = 880;
-        osc.type = 'sine';
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.15);
+        const ac = getAudioCtx();
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.connect(g); g.connect(ac.destination);
+        o.frequency.value = 880; o.type = 'sine';
+        g.gain.setValueAtTime(0.12, ac.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.15);
+        o.start(ac.currentTime); o.stop(ac.currentTime + 0.15);
     } catch(e) {}
 }
-
 function playShutter() {
     try {
-        const ctx = getAudioCtx();
-        // Suara shutter: noise burst cepat
-        const bufferSize = ctx.sampleRate * 0.12;
-        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-            data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 3);
-        }
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-        // Bandpass untuk bunyi klik
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.value = 2000;
-        filter.Q.value = 1;
-        source.connect(filter);
-        filter.connect(gain);
-        gain.connect(ctx.destination);
-        source.start(ctx.currentTime);
+        const ac = getAudioCtx();
+        const len = ac.sampleRate * 0.1;
+        const buf = ac.createBuffer(1, len, ac.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 4);
+        const s = ac.createBufferSource(); s.buffer = buf;
+        const g = ac.createGain();
+        g.gain.setValueAtTime(0.25, ac.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.1);
+        const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 2200; f.Q.value = 0.8;
+        s.connect(f); f.connect(g); g.connect(ac.destination); s.start(ac.currentTime);
     } catch(e) {}
 }
-
-function playMultiDone() {
+function playDone() {
     try {
-        const ctx = getAudioCtx();
-        // Tiga nada naik
+        const ac = getAudioCtx();
         [523, 659, 784].forEach((freq, i) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.frequency.value = freq;
-            osc.type = 'sine';
-            const t = ctx.currentTime + i * 0.12;
-            gain.gain.setValueAtTime(0.12, t);
-            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-            osc.start(t);
-            osc.stop(t + 0.2);
+            const o = ac.createOscillator(), g = ac.createGain();
+            o.connect(g); g.connect(ac.destination);
+            o.frequency.value = freq; o.type = 'sine';
+            const t = ac.currentTime + i * 0.1;
+            g.gain.setValueAtTime(0.1, t);
+            g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+            o.start(t); o.stop(t + 0.18);
         });
     } catch(e) {}
 }
@@ -734,52 +818,190 @@ const filters = [
     { id: 'bw', name: 'Film Noir', css: 'grayscale(100%) contrast(1.5) brightness(0.9)' },
 ];
 
-// ====== STIKER DEFINISI ======
-const stickers = [
-    { emoji: '👑', name: 'Mahkota' },
-    { emoji: '🤡', name: 'Badut' },
-    { emoji: '🐱', name: 'Kucing' },
-    { emoji: '🐶', name: 'Anjing' },
-    { emoji: '🌈', name: 'Pelangi' },
-    { emoji: '⭐', name: 'Bintang' },
-    { emoji: '❤️', name: 'Hati' },
-    { emoji: '🦋', name: 'Kupu-kupu' },
-    { emoji: '🌸', name: 'Sakura' },
-    { emoji: '🎵', name: 'Musik' },
-    { emoji: '💀', name: 'Tengkorak' },
-    { emoji: '😎', name: 'Keren' },
-    { emoji: '🔥', name: 'Api' },
-    { emoji: '🎀', name: 'Pita' },
-    { emoji: '🧸', name: 'Boneka' },
-    { emoji: '🍕', name: 'Pizza' },
-    { emoji: '🦄', name: 'Unicorn' },
-    { emoji: '👻', name: 'Hantu' },
+const stickerList = [
+    { emoji: '👑', name: 'Mahkota' }, { emoji: '🤡', name: 'Badut' },
+    { emoji: '🐱', name: 'Kucing' }, { emoji: '🐶', name: 'Anjing' },
+    { emoji: '🌈', name: 'Pelangi' }, { emoji: '⭐', name: 'Bintang' },
+    { emoji: '❤️', name: 'Hati' }, { emoji: '🦋', name: 'Kupu-kupu' },
+    { emoji: '🌸', name: 'Sakura' }, { emoji: '🎵', name: 'Musik' },
+    { emoji: '💀', name: 'Tengkorak' }, { emoji: '😎', name: 'Keren' },
+    { emoji: '🔥', name: 'Api' }, { emoji: '🎀', name: 'Pita' },
+    { emoji: '🧸', name: 'Boneka' }, { emoji: '🍕', name: 'Pizza' },
+    { emoji: '🦄', name: 'Unicorn' }, { emoji: '👻', name: 'Hantu' },
 ];
 
-// ====== INISIALISASI UI ======
-function initFilterGrid() {
-    const grid = document.getElementById('filterGrid');
-    filters.forEach(f => {
-        const item = document.createElement('div');
-        item.className = 'filter-item' + (f.id === 'none' ? ' active' : '');
-        item.dataset.filter = f.id;
-        item.onclick = () => setFilter(f.id);
-        item.innerHTML = `<div class="filter-preview"></div><div class="filter-name">${f.name}</div>`;
-        grid.appendChild(item);
+// ====== TEMPLATE PREVIEW (canvas mini) ======
+function drawMiniPreviews() {
+    drawPrevGrid();
+    drawPrevStrip();
+    drawPrevDefault();
+    drawPrevBirthday();
+    drawPrevGrad();
+}
+
+function drawPrevGrid() {
+    const c = document.getElementById('prevGrid');
+    if (!c) return;
+    c.width = 200; c.height = 150;
+    const x = c.getContext('2d');
+    x.fillStyle = '#FFF5E6'; x.fillRect(0, 0, 200, 150);
+    // Header
+    x.fillStyle = '#FF6B6B';
+    roundRect(x, 4, 4, 192, 24, 6); x.fill();
+    x.fillStyle = '#fff'; x.font = 'bold 11px Fredoka, sans-serif';
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText('Ponyo Booth', 100, 16);
+    // 4 kotak
+    const sy = 34, gw = 92, gh = 54, gap = 4;
+    for (let r = 0; r < 2; r++) for (let col = 0; col < 2; col++) {
+        const px = 4 + col * (gw + gap), py = sy + r * (gh + gap);
+        x.fillStyle = '#FFD4A8'; roundRect(x, px, py, gw, gh, 4); x.fill();
+        x.fillStyle = '#fff'; x.font = '18px serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+        x.fillText('📷', px + gw/2, py + gh/2);
+    }
+}
+
+function drawPrevStrip() {
+    const c = document.getElementById('prevStrip');
+    if (!c) return;
+    c.width = 200; c.height = 150;
+    const x = c.getContext('2d');
+    x.fillStyle = '#FFFFFF'; roundRect(x, 0, 0, 200, 150, 8); x.fill();
+    x.strokeStyle = '#FFD4A8'; x.lineWidth = 2; roundRect(x, 1, 1, 198, 148, 7); x.stroke();
+    // Header
+    x.fillStyle = '#FF6B6B'; x.font = 'bold 11px Fredoka, sans-serif';
+    x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Ponyo Booth', 100, 14);
+    // 4 strip vertikal
+    const sw = 40, sh = 90, gap = 6, sx = 14, sy = 28;
+    for (let i = 0; i < 4; i++) {
+        const px = sx + i * (sw + gap);
+        x.fillStyle = '#FFE8CC'; roundRect(x, px, sy, sw, sh, 4); x.fill();
+        x.fillStyle = '#fff'; x.font = '16px serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+        x.fillText('📷', px + sw/2, sy + sh/2);
+    }
+    x.fillStyle = '#FFD93D'; x.font = 'bold 9px Fredoka, sans-serif';
+    x.fillText('Strip Photobooth', 100, 140);
+}
+
+function drawPrevDefault() {
+    const c = document.getElementById('prevDefault');
+    if (!c) return;
+    c.width = 140; c.height = 105;
+    const x = c.getContext('2d');
+    x.fillStyle = '#FFF5E6'; roundRect(x, 0, 0, 140, 105, 6); x.fill();
+    x.strokeStyle = '#FFD4A8'; x.lineWidth = 2; roundRect(x, 1, 1, 138, 103, 5); x.stroke();
+    x.fillStyle = '#FFD4A8'; roundRect(x, 10, 10, 120, 85, 4); x.fill();
+    x.fillStyle = '#fff'; x.font = '24px serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText('📷', 70, 52);
+}
+
+function drawPrevBirthday() {
+    const c = document.getElementById('prevBirthday');
+    if (!c) return;
+    c.width = 140; c.height = 105;
+    const x = c.getContext('2d');
+    const g = x.createLinearGradient(0, 0, 140, 105);
+    g.addColorStop(0, '#FFE0EC'); g.addColorStop(1, '#FFF5E6');
+    x.fillStyle = g; roundRect(x, 0, 0, 140, 105, 6); x.fill();
+    x.strokeStyle = '#FF6B6B'; x.lineWidth = 2; roundRect(x, 1, 1, 138, 103, 5); x.stroke();
+    // Dot dekorasi
+    ['#FF6B6B40', '#FFD93D40', '#6BCB7740'].forEach((col, i) => {
+        x.beginPath(); x.arc(25 + i * 45, 20 + i * 10, 4, 0, Math.PI * 2);
+        x.fillStyle = col; x.fill();
+    });
+    x.fillStyle = '#FF6B6B'; x.font = 'bold 10px Fredoka, sans-serif';
+    x.textAlign = 'center'; x.textBaseline = 'top'; x.fillText('Happy Birthday!', 70, 8);
+    x.fillStyle = '#FFD4A8'; roundRect(x, 10, 28, 120, 60, 4); x.fill();
+    x.fillStyle = '#fff'; x.font = '20px serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText('📷', 70, 58);
+    // Mini balon
+    drawMiniBalloon(x, 15, 95, '#FF6B6B', 6);
+    drawMiniBalloon(x, 125, 92, '#FFD93D', 5);
+}
+
+function drawPrevGrad() {
+    const c = document.getElementById('prevGrad');
+    if (!c) return;
+    c.width = 140; c.height = 105;
+    const x = c.getContext('2d');
+    const g = x.createLinearGradient(0, 0, 0, 105);
+    g.addColorStop(0, '#1a1a2e'); g.addColorStop(1, '#16213e');
+    x.fillStyle = g; roundRect(x, 0, 0, 140, 105, 6); x.fill();
+    x.strokeStyle = '#D4AF37'; x.lineWidth = 2; roundRect(x, 1, 1, 138, 103, 5); x.stroke();
+    x.fillStyle = '#D4AF37'; x.font = 'bold 9px Fredoka, sans-serif';
+    x.textAlign = 'center'; x.textBaseline = 'top'; x.fillText('Congratulations!', 70, 6);
+    // Mini bintang
+    [20, 50, 100, 130].forEach((sx, i) => {
+        drawMiniStar(x, sx, 15 + i * 8, 2, '#D4AF3780');
+    });
+    x.fillStyle = '#D4AF37'; roundRect(x, 10, 28, 120, 60, 3); x.fill();
+    x.fillStyle = '#1a1a2e'; roundRect(x, 12, 30, 116, 56, 2); x.fill();
+    x.fillStyle = '#fff'; x.font = '20px serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText('📷', 70, 58);
+}
+
+function drawMiniBalloon(ctx, x, y, color, r) {
+    ctx.beginPath(); ctx.ellipse(x, y - r, r * 0.7, r, 0, 0, Math.PI * 2);
+    ctx.fillStyle = color; ctx.fill();
+}
+function drawMiniStar(ctx, cx, cy, r, color) {
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+        const a = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+        const px = cx + r * Math.cos(a), py = cy + r * Math.sin(a);
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+}
+
+// ====== SELECTOR FUNCTIONS ======
+function selectTemplate(tpl) {
+    selectedTemplate = tpl;
+    document.querySelectorAll('#templateOptions .option-card').forEach(c => {
+        c.classList.toggle('selected', c.dataset.tpl === tpl);
+    });
+}
+function selectFrame(frame) {
+    selectedFrame = frame;
+    document.querySelectorAll('#frameOptions .option-card').forEach(c => {
+        c.classList.toggle('selected', c.dataset.frame === frame);
     });
 }
 
-function initStickerGrid() {
-    const grid = document.getElementById('stickerGrid');
-    stickers.forEach(s => {
-        const btn = document.createElement('button');
-        btn.className = 'sticker-btn';
-        btn.textContent = s.emoji;
-        btn.title = s.name;
-        btn.setAttribute('aria-label', 'Stiker ' + s.name);
-        btn.onclick = () => selectSticker(s.emoji, btn);
-        grid.appendChild(btn);
-    });
+// ====== START SESSION ======
+function startSession() {
+    // Tentukan shot mode berdasarkan template
+    shotMode = 'multi'; // Grid dan strip selalu multi-shot
+
+    // Update info badge
+    const tplName = selectedTemplate === 'grid2x2' ? 'Grid 2x2' : 'Strip';
+    const frameName = selectedFrame === 'default' ? 'Default' : selectedFrame === 'birthday' ? 'Birthday' : 'Wisuda';
+    infoBadge.innerHTML = `<i class="fa-solid fa-table-cells" style="font-size:0.6rem;"></i> ${tplName} &middot; ${frameName}`;
+
+    // Transisi halaman
+    document.getElementById('templateScreen').classList.add('hidden');
+    setTimeout(() => {
+        document.getElementById('cameraScreen').classList.remove('hidden');
+        startCamera();
+    }, 300);
+}
+
+function backToTemplate() {
+    // Stop kamera
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    // Bersihkan stiker
+    placedStickers.forEach(s => s.remove());
+    placedStickers = [];
+    multiShotImages = [];
+    activeSticker = null;
+    selectedStickerEl = null;
+    document.querySelectorAll('.sticker-btn').forEach(b => b.classList.remove('active'));
+
+    // Transisi
+    document.getElementById('cameraScreen').classList.add('hidden');
+    setTimeout(() => {
+        document.getElementById('templateScreen').classList.remove('hidden');
+    }, 300);
 }
 
 // ====== KAMERA ======
@@ -792,15 +1014,11 @@ async function startCamera() {
         video.srcObject = stream;
         await video.play();
         placeholder.style.display = 'none';
-        btnStart.style.display = 'none';
-        btnCapture.style.display = '';
-        btnFlip.style.display = '';
-        panels.style.display = '';
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
         showToast('Kamera aktif!', 'fa-solid fa-check');
     } catch (err) {
-        showToast('Gagal mengakses kamera: ' + err.message, 'fa-solid fa-triangle-exclamation');
+        showToast('Gagal akses kamera: ' + err.message, 'fa-solid fa-triangle-exclamation');
     }
 }
 
@@ -812,75 +1030,62 @@ function resizeCanvas() {
 function flipCamera() {
     facingMode = facingMode === 'user' ? 'environment' : 'user';
     isFlipped = facingMode === 'user';
-    const sx = isFlipped ? '-1' : '1';
-    video.style.transform = `scaleX(${sx})`;
-    overlayCanvas.style.transform = `scaleX(${sx})`;
+    video.style.transform = `scaleX(${isFlipped ? '-1' : '1'})`;
+    overlayCanvas.style.transform = `scaleX(${isFlipped ? '-1' : '1'})`;
     if (stream) stream.getTracks().forEach(t => t.stop());
     startCamera();
 }
 
-// ====== MODE & TEMPLATE SELECTOR ======
-function setMode(mode) {
-    captureMode = mode;
-    document.querySelectorAll('#modeSelector .btn').forEach(b => {
-        b.classList.toggle('active', b.dataset.mode === mode);
-    });
-    // Template row relevan hanya untuk multi atau frame tertentu
-    const tplRow = document.getElementById('templateRow');
-    if (mode === 'single') {
-        tplRow.style.display = '';
-    } else {
-        tplRow.style.display = '';
-        // Multi-shot otomatis pakai template, default strip
-        if (currentTemplate === 'none') {
-            setTemplate('strip');
-        }
-    }
-}
-
-function setTemplate(tpl) {
-    currentTemplate = tpl;
-    document.querySelectorAll('#templateSelector .btn').forEach(b => {
-        b.classList.toggle('active', b.dataset.tpl === tpl);
-    });
-}
-
 // ====== FILTER ======
-function setFilter(filterId) {
-    currentFilter = filterId;
-    const filterObj = filters.find(f => f.id === filterId);
-    video.style.filter = filterObj.css;
+function initFilterGrid() {
+    const grid = document.getElementById('filterGrid');
+    filters.forEach(f => {
+        const item = document.createElement('div');
+        item.className = 'filter-item' + (f.id === 'none' ? ' active' : '');
+        item.dataset.filter = f.id;
+        item.onclick = () => setFilter(f.id);
+        item.innerHTML = `<div class="filter-preview"></div><div class="filter-name">${f.name}</div>`;
+        grid.appendChild(item);
+    });
+}
+function setFilter(id) {
+    currentFilter = id;
+    video.style.filter = filters.find(f => f.id === id).css;
     document.querySelectorAll('.filter-item').forEach(el => {
-        el.classList.toggle('active', el.dataset.filter === filterId);
+        el.classList.toggle('active', el.dataset.filter === id);
     });
 }
 
-// ====== STIKER SYSTEM ======
-function selectSticker(emoji, btn) {
-    if (activeSticker === emoji) {
-        activeSticker = null;
-        btn.classList.remove('active');
-        cameraFrame.style.cursor = 'default';
-    } else {
-        activeSticker = emoji;
-        document.querySelectorAll('.sticker-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        cameraFrame.style.cursor = 'crosshair';
-    }
-    deselectAllStickers();
+// ====== STIKER ======
+function initStickerGrid() {
+    const grid = document.getElementById('stickerGrid');
+    stickerList.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'sticker-btn';
+        btn.textContent = s.emoji;
+        btn.title = s.name;
+        btn.setAttribute('aria-label', 'Stiker ' + s.name);
+        btn.onclick = () => {
+            if (activeSticker === s.emoji) {
+                activeSticker = null; btn.classList.remove('active');
+                cameraFrame.style.cursor = 'default';
+            } else {
+                activeSticker = s.emoji;
+                document.querySelectorAll('.sticker-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                cameraFrame.style.cursor = 'crosshair';
+            }
+            deselectAllStickers();
+        };
+        grid.appendChild(btn);
+    });
 }
 
-// Klik pada frame untuk tempel stiker
 cameraFrame.addEventListener('click', (e) => {
     if (!activeSticker) return;
     if (e.target.closest('.placed-sticker')) return;
-    if (e.target.closest('.sticker-controls')) return;
-    if (e.target.closest('.sticker-resize-handle')) return;
-
     const rect = cameraFrame.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    placeSticker(activeSticker, x, y);
+    placeSticker(activeSticker, e.clientX - rect.left, e.clientY - rect.top);
 });
 
 function placeSticker(emoji, x, y) {
@@ -890,95 +1095,60 @@ function placeSticker(emoji, x, y) {
     sticker.dataset.id = id;
     sticker.dataset.emoji = emoji;
     sticker.dataset.rotation = '0';
-    sticker.dataset.scale = '1';
-
     const size = 48;
     sticker.style.left = (x - size / 2) + 'px';
     sticker.style.top = (y - size / 2) + 'px';
     sticker.style.width = size + 'px';
     sticker.style.height = size + 'px';
-
     sticker.innerHTML = `
         <span class="sticker-emoji" style="font-size:${size}px;">${emoji}</span>
         <div class="sticker-controls">
-            <button class="sticker-ctrl-btn" data-action="rotate-left" title="Putar kiri"><i class="fa-solid fa-rotate-left"></i></button>
-            <button class="sticker-ctrl-btn" data-action="rotate-right" title="Putar kanan"><i class="fa-solid fa-rotate-right"></i></button>
-            <button class="sticker-ctrl-btn" data-action="zoom-in" title="Perbesar"><i class="fa-solid fa-plus"></i></button>
-            <button class="sticker-ctrl-btn" data-action="zoom-out" title="Perkecil"><i class="fa-solid fa-minus"></i></button>
-            <button class="sticker-ctrl-btn" data-action="delete" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+            <button class="sticker-ctrl-btn" data-action="rl" title="Putar kiri"><i class="fa-solid fa-rotate-left"></i></button>
+            <button class="sticker-ctrl-btn" data-action="rr" title="Putar kanan"><i class="fa-solid fa-rotate-right"></i></button>
+            <button class="sticker-ctrl-btn" data-action="zi" title="Perbesar"><i class="fa-solid fa-plus"></i></button>
+            <button class="sticker-ctrl-btn" data-action="zo" title="Perkecil"><i class="fa-solid fa-minus"></i></button>
+            <button class="sticker-ctrl-btn" data-action="del" title="Hapus"><i class="fa-solid fa-trash"></i></button>
         </div>
         <div class="sticker-resize-handle"></div>
     `;
-
-    // Event: pilih stiker
+    // Drag
     sticker.addEventListener('mousedown', (e) => {
         if (e.target.closest('.sticker-controls') || e.target.closest('.sticker-resize-handle')) return;
         selectPlacedSticker(sticker);
-        startDrag(e, sticker);
-        e.stopPropagation();
-        e.preventDefault();
+        startDrag(e, sticker); e.stopPropagation(); e.preventDefault();
     });
     sticker.addEventListener('touchstart', (e) => {
         if (e.target.closest('.sticker-controls') || e.target.closest('.sticker-resize-handle')) return;
+        if (e.touches.length === 2) { handlePinchStart(e, sticker); e.stopPropagation(); e.preventDefault(); return; }
         selectPlacedSticker(sticker);
-        if (e.touches.length === 1) {
-            startDrag(e.touches[0], sticker);
-        }
-        e.stopPropagation();
-        e.preventDefault();
-    }, { passive: false });
-
-    // Pinch zoom & two-finger rotate
-    sticker.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 2) {
-            handlePinchStart(e, sticker);
-            e.stopPropagation();
-            e.preventDefault();
-        }
+        startDrag(e.touches[0], sticker); e.stopPropagation(); e.preventDefault();
     }, { passive: false });
     sticker.addEventListener('touchmove', (e) => {
-        if (e.touches.length === 2) {
-            handlePinchMove(e, sticker);
-            e.stopPropagation();
-            e.preventDefault();
-        }
+        if (e.touches.length === 2) { handlePinchMove(e, sticker); e.stopPropagation(); e.preventDefault(); }
     }, { passive: false });
 
-    // Control buttons
+    // Controls
     sticker.querySelectorAll('.sticker-ctrl-btn').forEach(btn => {
-        btn.addEventListener('mousedown', (e) => e.stopPropagation());
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('mousedown', e => e.stopPropagation());
+        btn.addEventListener('click', e => {
             e.stopPropagation();
-            const action = btn.dataset.action;
-            if (action === 'rotate-left') rotateSticker(sticker, -15);
-            else if (action === 'rotate-right') rotateSticker(sticker, 15);
-            else if (action === 'zoom-in') scaleSticker(sticker, 1.2);
-            else if (action === 'zoom-out') scaleSticker(sticker, 0.8);
-            else if (action === 'delete') {
-                sticker.remove();
-                placedStickers = placedStickers.filter(s => s !== sticker);
-            }
+            const a = btn.dataset.action;
+            if (a === 'rl') rotateSticker(sticker, -15);
+            else if (a === 'rr') rotateSticker(sticker, 15);
+            else if (a === 'zi') scaleSticker(sticker, 1.2);
+            else if (a === 'zo') scaleSticker(sticker, 0.8);
+            else if (a === 'del') { sticker.remove(); placedStickers = placedStickers.filter(s => s !== sticker); }
         });
     });
 
     // Resize handle
-    const resizeHandle = sticker.querySelector('.sticker-resize-handle');
-    resizeHandle.addEventListener('mousedown', (e) => {
-        startResize(e, sticker);
-        e.stopPropagation();
-        e.preventDefault();
-    });
-    resizeHandle.addEventListener('touchstart', (e) => {
-        startResize(e.touches[0], sticker);
-        e.stopPropagation();
-        e.preventDefault();
-    }, { passive: false });
+    const rh = sticker.querySelector('.sticker-resize-handle');
+    rh.addEventListener('mousedown', e => { startResize(e, sticker); e.stopPropagation(); e.preventDefault(); });
+    rh.addEventListener('touchstart', e => { startResize(e.touches[0], sticker); e.stopPropagation(); e.preventDefault(); }, { passive: false });
 
-    // Double click hapus
-    sticker.addEventListener('dblclick', (e) => {
+    sticker.addEventListener('dblclick', e => {
         e.stopPropagation();
-        sticker.remove();
-        placedStickers = placedStickers.filter(s => s !== sticker);
+        sticker.remove(); placedStickers = placedStickers.filter(s => s !== sticker);
     });
 
     cameraFrame.appendChild(sticker);
@@ -986,211 +1156,115 @@ function placeSticker(emoji, x, y) {
     selectPlacedSticker(sticker);
 }
 
-function selectPlacedSticker(el) {
-    deselectAllStickers();
-    el.classList.add('selected');
-    selectedStickerEl = el;
-}
+function selectPlacedSticker(el) { deselectAllStickers(); el.classList.add('selected'); selectedStickerEl = el; }
+function deselectAllStickers() { document.querySelectorAll('.placed-sticker.selected').forEach(s => s.classList.remove('selected')); selectedStickerEl = null; }
+document.addEventListener('mousedown', e => { if (!e.target.closest('.placed-sticker') && !e.target.closest('.sticker-btn')) deselectAllStickers(); });
 
-function deselectAllStickers() {
-    document.querySelectorAll('.placed-sticker.selected').forEach(s => s.classList.remove('selected'));
-    selectedStickerEl = null;
-}
-
-// Klik di luar stiker untuk deselect
-document.addEventListener('mousedown', (e) => {
-    if (!e.target.closest('.placed-sticker') && !e.target.closest('.sticker-btn')) {
-        deselectAllStickers();
-    }
-});
-
-// ====== DRAG ======
+// Drag
 let dragState = null;
 function startDrag(e, sticker) {
-    const rect = cameraFrame.getBoundingClientRect();
-    dragState = {
-        sticker,
-        offsetX: e.clientX - rect.left - parseFloat(sticker.style.left),
-        offsetY: e.clientY - rect.top - parseFloat(sticker.style.top),
-    };
+    const r = cameraFrame.getBoundingClientRect();
+    dragState = { sticker, ox: e.clientX - r.left - parseFloat(sticker.style.left), oy: e.clientY - r.top - parseFloat(sticker.style.top) };
 }
-
-function onDragMove(clientX, clientY) {
+function onDragMove(cx, cy) {
     if (!dragState) return;
-    const rect = cameraFrame.getBoundingClientRect();
-    let newX = clientX - rect.left - dragState.offsetX;
-    let newY = clientY - rect.top - dragState.offsetY;
+    const r = cameraFrame.getBoundingClientRect();
     const w = parseFloat(dragState.sticker.style.width);
-    const h = parseFloat(dragState.sticker.style.height);
-    newX = Math.max(-w * 0.3, Math.min(newX, rect.width - w * 0.7));
-    newY = Math.max(-h * 0.3, Math.min(newY, rect.height - h * 0.7));
-    dragState.sticker.style.left = newX + 'px';
-    dragState.sticker.style.top = newY + 'px';
+    dragState.sticker.style.left = Math.max(-w * 0.3, Math.min(cx - r.left - dragState.ox, r.width - w * 0.7)) + 'px';
+    dragState.sticker.style.top = Math.max(-w * 0.3, Math.min(cy - r.top - dragState.oy, r.height - w * 0.7)) + 'px';
 }
 
-document.addEventListener('mousemove', (e) => {
-    if (dragState) onDragMove(e.clientX, e.clientY);
-    if (resizeState) onResizeMove(e.clientX, e.clientY);
-});
-document.addEventListener('touchmove', (e) => {
-    if (dragState && e.touches.length === 1) onDragMove(e.touches[0].clientX, e.touches[0].clientY);
-    if (resizeState && e.touches.length === 1) onResizeMove(e.touches[0].clientX, e.touches[0].clientY);
-}, { passive: false });
-document.addEventListener('mouseup', () => { dragState = null; resizeState = null; });
-document.addEventListener('touchend', () => { dragState = null; resizeState = null; pinchState = null; });
-
-// ====== RESIZE HANDLE ======
+// Resize
 let resizeState = null;
 function startResize(e, sticker) {
-    const rect = cameraFrame.getBoundingClientRect();
-    const sRect = sticker.getBoundingClientRect();
-    resizeState = {
-        sticker,
-        startDist: Math.hypot(e.clientX - sRect.right, e.clientY - sRect.bottom),
-        startW: parseFloat(sticker.style.width),
-        startH: parseFloat(sticker.style.height),
-    };
+    const sr = sticker.getBoundingClientRect();
+    resizeState = { sticker, startDist: Math.hypot(e.clientX - sr.right, e.clientY - sr.bottom), startW: parseFloat(sticker.style.width) };
 }
-
-function onResizeMove(clientX, clientY) {
+function onResizeMove(cx, cy) {
     if (!resizeState) return;
-    const sRect = resizeState.sticker.getBoundingClientRect();
-    const dist = Math.max(10, Math.hypot(clientX - sRect.right, clientY - sRect.bottom));
-    const ratio = dist / resizeState.startDist;
-    const newW = Math.max(20, Math.min(200, resizeState.startW * ratio));
-    const newH = newW; // Tetap square
-    resizeState.sticker.style.width = newW + 'px';
-    resizeState.sticker.style.height = newH + 'px';
-    resizeState.sticker.querySelector('.sticker-emoji').style.fontSize = newW + 'px';
+    const sr = resizeState.sticker.getBoundingClientRect();
+    const dist = Math.max(10, Math.hypot(cx - sr.right, cy - sr.bottom));
+    const nw = Math.max(20, Math.min(200, resizeState.startW * (dist / resizeState.startDist)));
+    resizeState.sticker.style.width = nw + 'px';
+    resizeState.sticker.style.height = nw + 'px';
+    resizeState.sticker.querySelector('.sticker-emoji').style.fontSize = nw + 'px';
 }
 
-// ====== PINCH ZOOM & ROTATE (MOBILE) ======
+// Pinch
 let pinchState = null;
 function handlePinchStart(e, sticker) {
     const t = e.touches;
-    pinchState = {
-        sticker,
-        startDist: Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY),
-        startAngle: Math.atan2(t[1].clientY - t[0].clientY, t[1].clientX - t[0].clientX) * 180 / Math.PI,
-        startW: parseFloat(sticker.style.width),
-        startRot: parseFloat(sticker.dataset.rotation),
-    };
+    pinchState = { sticker, startDist: Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY), startW: parseFloat(sticker.style.width), startRot: parseFloat(sticker.dataset.rotation), startAngle: Math.atan2(t[1].clientY - t[0].clientY, t[1].clientX - t[0].clientX) * 180 / Math.PI };
 }
-
 function handlePinchMove(e, sticker) {
-    if (!pinchState || !pinchState.sticker === sticker) return;
+    if (!pinchState) return;
     const t = e.touches;
     const dist = Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
     const angle = Math.atan2(t[1].clientY - t[0].clientY, t[1].clientX - t[0].clientX) * 180 / Math.PI;
-    const scale = dist / pinchState.startDist;
-    const rotDelta = angle - pinchState.startAngle;
-
-    const newW = Math.max(20, Math.min(200, pinchState.startW * scale));
-    sticker.style.width = newW + 'px';
-    sticker.style.height = newW + 'px';
-    sticker.querySelector('.sticker-emoji').style.fontSize = newW + 'px';
-
-    const newRot = pinchState.startRot + rotDelta;
-    sticker.dataset.rotation = newRot;
-    sticker.querySelector('.sticker-emoji').style.transform = `rotate(${newRot}deg)`;
+    const nw = Math.max(20, Math.min(200, pinchState.startW * (dist / pinchState.startDist)));
+    sticker.style.width = nw + 'px'; sticker.style.height = nw + 'px';
+    sticker.querySelector('.sticker-emoji').style.fontSize = nw + 'px';
+    const nr = pinchState.startRot + (angle - pinchState.startAngle);
+    sticker.dataset.rotation = nr;
+    sticker.querySelector('.sticker-emoji').style.transform = `rotate(${nr}deg)`;
 }
 
-// ====== ROTATE & SCALE HELPERS ======
-function rotateSticker(sticker, deg) {
-    const current = parseFloat(sticker.dataset.rotation) || 0;
-    const newRot = current + deg;
-    sticker.dataset.rotation = newRot;
-    sticker.querySelector('.sticker-emoji').style.transform = `rotate(${newRot}deg)`;
-}
+document.addEventListener('mousemove', e => { if (dragState) onDragMove(e.clientX, e.clientY); if (resizeState) onResizeMove(e.clientX, e.clientY); });
+document.addEventListener('touchmove', e => { if (dragState && e.touches.length === 1) onDragMove(e.touches[0].clientX, e.touches[0].clientY); if (resizeState && e.touches.length === 1) onResizeMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+document.addEventListener('mouseup', () => { dragState = null; resizeState = null; });
+document.addEventListener('touchend', () => { dragState = null; resizeState = null; pinchState = null; });
 
-function scaleSticker(sticker, factor) {
-    const currentW = parseFloat(sticker.style.width);
-    const newW = Math.max(20, Math.min(200, currentW * factor));
-    sticker.style.width = newW + 'px';
-    sticker.style.height = newW + 'px';
-    sticker.querySelector('.sticker-emoji').style.fontSize = newW + 'px';
+function rotateSticker(s, deg) {
+    const nr = (parseFloat(s.dataset.rotation) || 0) + deg;
+    s.dataset.rotation = nr;
+    s.querySelector('.sticker-emoji').style.transform = `rotate(${nr}deg)`;
+}
+function scaleSticker(s, f) {
+    const nw = Math.max(20, Math.min(200, parseFloat(s.style.width) * f));
+    s.style.width = nw + 'px'; s.style.height = nw + 'px';
+    s.querySelector('.sticker-emoji').style.fontSize = nw + 'px';
 }
 
 // ====== TIMER ======
 function updateTimerLabel() {
-    const val = document.getElementById('timerSlider').value;
-    document.getElementById('timerLabel').textContent = val == 0 ? 'Langsung' : val + ' detik';
+    const v = document.getElementById('timerSlider').value;
+    document.getElementById('timerLabel').textContent = v == 0 ? 'Langsung' : v + ' detik';
 }
 
-// ====== CAPTURE HANDLER ======
+// ====== CAPTURE ======
 async function handleCapture() {
     if (!stream || isCapturing) return;
-
-    if (captureMode === 'multi') {
-        await multiShotCapture();
-    } else {
-        await singleShotCapture();
-    }
+    await multiShotCapture();
 }
 
-// ====== SINGLE SHOT ======
-async function singleShotCapture() {
-    isCapturing = true;
-    btnCapture.disabled = true;
-
-    const timerVal = parseInt(document.getElementById('timerSlider').value);
-    await runCountdown(timerVal);
-
-    playShutter();
-    flashEffect();
-
-    const dataUrl = captureSingleFrame();
-    photos.push({ url: dataUrl, type: 'single' });
-    launchConfetti();
-    updateGallery();
-    showToast('Foto berhasil diambil!', 'fa-solid fa-camera');
-
-    isCapturing = false;
-    btnCapture.disabled = false;
-}
-
-// ====== MULTI-SHOT ======
 async function multiShotCapture() {
     isCapturing = true;
     btnCapture.disabled = true;
     multiShotImages = [];
-
     const timerVal = parseInt(document.getElementById('timerSlider').value);
-    const totalShots = 4;
+    const total = selectedTemplate === 'grid2x2' ? 4 : 4;
 
-    for (let i = 0; i < totalShots; i++) {
-        captureBtnText.textContent = `${i + 1} / ${totalShots}`;
-
-        await runCountdown(timerVal, `Foto ${i + 1} dari ${totalShots}`);
-
+    for (let i = 0; i < total; i++) {
+        captureBtnText.textContent = `${i + 1} / ${total}`;
+        await runCountdown(timerVal, `Foto ${i + 1} dari ${total}`);
         playShutter();
         flashEffect();
-
-        // Tangkap frame mentah (tanpa stiker, tanpa frame)
-        const imgData = captureRawFrame();
-        multiShotImages.push(imgData);
-
-        if (i < totalShots - 1) {
-            await sleep(600);
-        }
+        multiShotImages.push(captureRawFrame());
+        if (i < total - 1) await sleep(500);
     }
-
     captureBtnText.textContent = 'Ambil Foto';
 
-    // Gabungkan semua frame ke template
+    // Assemble
     const finalUrl = assembleMultiShot(multiShotImages);
     photos.push({ url: finalUrl, type: 'multi' });
-
-    playMultiDone();
+    playDone();
     launchConfetti();
     updateGallery();
     showToast('Multi-shot selesai!', 'fa-solid fa-images');
-
     isCapturing = false;
     btnCapture.disabled = false;
 }
 
-// ====== COUNTDOWN ======
 async function runCountdown(seconds, subText) {
     countdownSub.textContent = subText || '';
     if (seconds > 0) {
@@ -1213,676 +1287,329 @@ function flashEffect() {
     setTimeout(() => flashOverlay.classList.remove('active'), 200);
 }
 
-// ====== CAPTURE RAW FRAME (tanpa stiker/frame, hanya video + filter) ======
+// ====== CAPTURE RAW ======
 function captureRawFrame() {
     const c = document.createElement('canvas');
-    const cw = video.videoWidth || 640;
-    const ch = video.videoHeight || 480;
-    c.width = cw;
-    c.height = ch;
-    const cctx = c.getContext('2d');
-
-    const filterObj = filters.find(f => f.id === currentFilter);
-    cctx.filter = filterObj.css;
-    if (isFlipped) { cctx.translate(cw, 0); cctx.scale(-1, 1); }
-    cctx.drawImage(video, 0, 0, cw, ch);
-
+    const cw = video.videoWidth || 640, ch = video.videoHeight || 480;
+    c.width = cw; c.height = ch;
+    const x = c.getContext('2d');
+    x.filter = filters.find(f => f.id === currentFilter).css;
+    if (isFlipped) { x.translate(cw, 0); x.scale(-1, 1); }
+    x.drawImage(video, 0, 0, cw, ch);
     return c;
 }
 
-// ====== CAPTURE SINGLE FRAME (dengan stiker dan watermark) ======
-function captureSingleFrame() {
-    const rawCanvas = captureRawFrame();
-    const cw = rawCanvas.width;
-    const ch = rawCanvas.height;
-    const cctx = rawCanvas.getContext('2d');
-    cctx.setTransform(1, 0, 0, 1, 0, 0);
-    cctx.filter = 'none';
-
-    // Gambar stiker
-    drawStickersToCanvas(cctx, cw, ch);
-
-    // Watermark
-    drawWatermark(cctx, cw, ch);
-
-    // Terapkan frame jika ada
-    if (currentTemplate !== 'none' && currentTemplate !== 'grid2x2' && currentTemplate !== 'strip') {
-        drawFrameOverlay(rawCanvas, currentTemplate);
-    }
-
-    return rawCanvas.toDataURL('image/png');
-}
-
-// ====== GAMBAR STIKER KE CANVAS ======
+// ====== DRAW STICKERS TO CANVAS ======
 function drawStickersToCanvas(cctx, canvasW, canvasH) {
-    const frameRect = cameraFrame.getBoundingClientRect();
-    const scaleX = canvasW / frameRect.width;
-    const scaleY = canvasH / frameRect.height;
-
+    const fr = cameraFrame.getBoundingClientRect();
+    const sx = canvasW / fr.width, sy = canvasH / fr.height;
     placedStickers.forEach(sticker => {
-        const sLeft = parseFloat(sticker.style.left);
-        const sTop = parseFloat(sticker.style.top);
-        const sSize = parseFloat(sticker.style.width);
-        const rotation = parseFloat(sticker.dataset.rotation) || 0;
-
-        const fontSize = Math.round(sSize * scaleX);
-
+        const sL = parseFloat(sticker.style.left), sT = parseFloat(sticker.style.top);
+        const sS = parseFloat(sticker.style.width);
+        const rot = parseFloat(sticker.dataset.rotation) || 0;
+        const fs = Math.round(sS * sx);
         cctx.save();
-        // Pusat rotasi
-        const drawX = sLeft * scaleX + (sSize * scaleX) / 2;
-        const drawY = sTop * scaleY + (sSize * scaleY) / 2;
-
-        let finalX = drawX;
-        if (isFlipped) {
-            finalX = canvasW - drawX;
-        }
-
-        cctx.translate(finalX, drawY);
+        let dx = sL * sx + (sS * sx) / 2, dy = sT * sy + (sS * sy) / 2;
+        if (isFlipped) dx = canvasW - dx;
+        cctx.translate(dx, dy);
         if (isFlipped) cctx.scale(-1, 1);
-        cctx.rotate((rotation * Math.PI) / 180);
-
-        cctx.font = `${fontSize}px serif`;
-        cctx.textAlign = 'center';
-        cctx.textBaseline = 'middle';
+        cctx.rotate(rot * Math.PI / 180);
+        cctx.font = `${fs}px serif`;
+        cctx.textAlign = 'center'; cctx.textBaseline = 'middle';
         cctx.fillText(sticker.dataset.emoji, 0, 0);
         cctx.restore();
     });
 }
 
-// ====== WATERMARK ======
 function drawWatermark(cctx, cw, ch) {
     cctx.save();
-    const fs = Math.round(cw * 0.028);
-    cctx.font = `bold ${fs}px Fredoka, sans-serif`;
-    cctx.textAlign = 'right';
-    cctx.textBaseline = 'bottom';
-    cctx.fillStyle = 'rgba(255,255,255,0.6)';
-    cctx.shadowColor = 'rgba(0,0,0,0.3)';
-    cctx.shadowBlur = 3;
-    cctx.fillText('Ponyo Booth', cw - 12, ch - 10);
+    cctx.font = `bold ${Math.round(cw * 0.025)}px Fredoka, sans-serif`;
+    cctx.textAlign = 'right'; cctx.textBaseline = 'bottom';
+    cctx.fillStyle = 'rgba(255,255,255,0.5)';
+    cctx.shadowColor = 'rgba(0,0,0,0.3)'; cctx.shadowBlur = 3;
+    cctx.fillText('Ponyo Booth', cw - 10, ch - 8);
     cctx.restore();
 }
 
 // ====== ASSEMBLE MULTI-SHOT ======
-function assembleMultiShot(imageCanvases) {
-    const srcW = imageCanvases[0].width;
-    const srcH = imageCanvases[0].height;
-    const tpl = currentTemplate;
-
-    if (tpl === 'grid2x2') {
-        return assembleGrid2x2(imageCanvases, srcW, srcH);
-    } else if (tpl === 'strip') {
-        return assembleStrip(imageCanvases, srcW, srcH);
-    } else if (tpl === 'birthday') {
-        return assembleThemed(imageCanvases, srcW, srcH, 'birthday');
-    } else if (tpl === 'graduation') {
-        return assembleThemed(imageCanvases, srcW, srcH, 'graduation');
-    } else {
-        // Fallback: strip
-        return assembleStrip(imageCanvases, srcW, srcH);
-    }
+function assembleMultiShot(imgs) {
+    const srcW = imgs[0].width, srcH = imgs[0].height;
+    if (selectedTemplate === 'grid2x2') return assembleGrid(imgs, srcW, srcH);
+    return assembleStrip(imgs, srcW, srcH);
 }
 
 // ====== GRID 2x2 ======
-function assembleGrid2x2(imgs, srcW, srcH) {
-    const pad = 8;
-    const headerH = 50;
-    const w = srcW * 2 + pad * 3;
-    const h = srcH * 2 + pad * 3 + headerH;
+function assembleGrid(imgs, srcW, srcH) {
+    const pad = Math.round(srcW * 0.015);
+    const headerH = Math.round(srcH * 0.1);
+    const w = srcW * 2 + pad * 3, h = srcH * 2 + pad * 3 + headerH;
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const x = c.getContext('2d');
 
-    const c = document.createElement('canvas');
-    c.width = w; c.height = h;
-    const ctx = c.getContext('2d');
-
-    // Background
-    ctx.fillStyle = '#FFF5E6';
-    ctx.fillRect(0, 0, w, h);
+    if (selectedFrame === 'birthday') drawBirthdayBg(x, w, h);
+    else if (selectedFrame === 'graduation') drawGraduationBg(x, w, h);
+    else { x.fillStyle = '#FFF5E6'; roundRect(x, 0, 0, w, h, 16); x.fill(); }
 
     // Header
-    ctx.fillStyle = '#FF6B6B';
-    roundRect(ctx, pad, pad, w - pad * 2, headerH, 12);
-    ctx.fill();
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = `bold ${Math.round(headerH * 0.45)}px Fredoka, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Ponyo Booth', w / 2, pad + headerH / 2);
-
-    // 4 foto
-    const startY = pad + headerH + pad;
-    for (let i = 0; i < 4; i++) {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
-        const x = pad + col * (srcW + pad);
-        const y = startY + row * (srcH + pad);
-
-        ctx.save();
-        roundRect(ctx, x, y, srcW, srcH, 8);
-        ctx.clip();
-        ctx.drawImage(imgs[i], x, y, srcW, srcH);
-        ctx.restore();
+    if (selectedFrame === 'birthday') {
+        x.fillStyle = '#FF6B6B'; x.font = `bold ${Math.round(headerH * 0.45)}px Fredoka, sans-serif`;
+        x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Happy Birthday!', w / 2, pad + headerH / 2);
+    } else if (selectedFrame === 'graduation') {
+        x.fillStyle = '#D4AF37'; x.font = `bold ${Math.round(headerH * 0.45)}px Fredoka, sans-serif`;
+        x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Congratulations!', w / 2, pad + headerH / 2);
+    } else {
+        x.fillStyle = '#FF6B6B'; roundRect(x, pad, pad, w - pad * 2, headerH, 12); x.fill();
+        x.fillStyle = '#fff'; x.font = `bold ${Math.round(headerH * 0.45)}px Fredoka, sans-serif`;
+        x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Ponyo Booth', w / 2, pad + headerH / 2);
     }
 
-    drawWatermark(ctx, w, h);
+    // 4 foto
+    const sy = pad + headerH + pad;
+    for (let i = 0; i < 4; i++) {
+        const col = i % 2, row = Math.floor(i / 2);
+        const px = pad + col * (srcW + pad), py = sy + row * (srcH + pad);
+        if (selectedFrame === 'graduation') {
+            x.fillStyle = '#D4AF37'; roundRect(x, px - 3, py - 3, srcW + 6, srcH + 6, 8); x.fill();
+        }
+        x.save(); roundRect(x, px, py, srcW, srcH, 6); x.clip();
+        x.drawImage(imgs[i], px, py, srcW, srcH); x.restore();
+        if (selectedFrame === 'birthday') {
+            x.strokeStyle = '#fff'; x.lineWidth = 3; roundRect(x, px, py, srcW, srcH, 6); x.stroke();
+        }
+    }
+
+    // Stiker per-foto (gambar di tengah canvas sebagai referensi)
+    // Karena stiker ditempel di live view, kita skip di multi-shot untuk menjaga kebersihan
+
+    drawWatermark(x, w, h);
+    if (selectedFrame === 'birthday') drawBirthdayDecor(x, w, h);
+    if (selectedFrame === 'graduation') drawGraduationDecor(x, w, h);
+
     return c.toDataURL('image/png');
 }
 
-// ====== STRIP PANJANG ======
+// ====== STRIP ======
 function assembleStrip(imgs, srcW, srcH) {
-    const pad = 6;
-    const headerH = 44;
-    const footerH = 36;
+    const pad = Math.round(srcW * 0.02);
+    const headerH = Math.round(srcH * 0.08);
+    const footerH = Math.round(srcH * 0.07);
+    const imgW = Math.round(srcH * 0.75 * (srcW / srcH));
     const count = imgs.length;
-    const imgW = Math.round(srcH * (srcW / srcH) * 0.85);
     const w = imgW * count + pad * (count + 1);
-    const h = srcH * 0.85 + headerH + footerH + pad * 3;
+    const h = Math.round(srcH * 0.75) + headerH + footerH + pad * 3;
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const x = c.getContext('2d');
 
-    const c = document.createElement('canvas');
-    c.width = w; c.height = h;
-    const ctx = c.getContext('2d');
-
-    // Background putih
-    ctx.fillStyle = '#FFFFFF';
-    roundRect(ctx, 0, 0, w, h, 16);
-    ctx.fill();
-
-    // Border
-    ctx.strokeStyle = '#FFD4A8';
-    ctx.lineWidth = 3;
-    roundRect(ctx, 1.5, 1.5, w - 3, h - 3, 15);
-    ctx.stroke();
+    if (selectedFrame === 'birthday') drawBirthdayBg(x, w, h);
+    else if (selectedFrame === 'graduation') drawGraduationBg(x, w, h);
+    else { x.fillStyle = '#FFFFFF'; roundRect(x, 0, 0, w, h, 14); x.fill(); x.strokeStyle = '#FFD4A8'; x.lineWidth = 3; roundRect(x, 1.5, 1.5, w - 3, h - 3, 13); x.stroke(); }
 
     // Header
-    ctx.fillStyle = '#FF6B6B';
-    ctx.font = `bold ${Math.round(headerH * 0.5)}px Fredoka, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Ponyo Booth', w / 2, pad + headerH / 2);
+    if (selectedFrame === 'birthday') {
+        x.fillStyle = '#FF6B6B'; x.font = `bold ${Math.round(headerH * 0.55)}px Fredoka, sans-serif`;
+        x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Happy Birthday!', w / 2, pad + headerH / 2);
+    } else if (selectedFrame === 'graduation') {
+        x.fillStyle = '#D4AF37'; x.font = `bold ${Math.round(headerH * 0.55)}px Fredoka, sans-serif`;
+        x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Congratulations!', w / 2, pad + headerH / 2);
+    } else {
+        x.fillStyle = '#FF6B6B'; x.font = `bold ${Math.round(headerH * 0.55)}px Fredoka, sans-serif`;
+        x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Ponyo Booth', w / 2, pad + headerH / 2);
+    }
 
-    const startY = pad + headerH + pad;
+    const sy = pad + headerH + pad;
+    const imgH = h - sy - footerH - pad;
     for (let i = 0; i < count; i++) {
-        const x = pad + i * (imgW + pad);
-        ctx.save();
-        roundRect(ctx, x, startY, imgW, h - startY - footerH - pad, 6);
-        ctx.clip();
-        ctx.drawImage(imgs[i], x, startY, imgW, h - startY - footerH - pad);
-        ctx.restore();
+        const px = pad + i * (imgW + pad);
+        if (selectedFrame === 'graduation') {
+            x.fillStyle = '#D4AF37'; roundRect(x, px - 2, sy - 2, imgW + 4, imgH + 4, 6); x.fill();
+        }
+        x.save(); roundRect(x, px, sy, imgW, imgH, 5); x.clip();
+        x.drawImage(imgs[i], px, sy, imgW, imgH); x.restore();
+        if (selectedFrame === 'birthday') {
+            x.strokeStyle = '#fff'; x.lineWidth = 2; roundRect(x, px, sy, imgW, imgH, 5); x.stroke();
+        }
     }
 
     // Footer
-    ctx.fillStyle = '#FFD93D';
-    ctx.font = `bold ${Math.round(footerH * 0.5)}px Fredoka, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Strip Photobooth', w / 2, h - pad - footerH / 2);
+    if (selectedFrame === 'birthday') {
+        x.fillStyle = '#FFD93D'; x.font = `bold ${Math.round(footerH * 0.5)}px Fredoka, sans-serif`;
+        x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Strip Photobooth', w / 2, h - pad - footerH / 2);
+    } else if (selectedFrame === 'graduation') {
+        x.fillStyle = '#D4AF37'; x.font = `bold ${Math.round(footerH * 0.5)}px Fredoka, sans-serif`;
+        x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Class of ' + new Date().getFullYear(), w / 2, h - pad - footerH / 2);
+    } else {
+        x.fillStyle = '#FFD93D'; x.font = `bold ${Math.round(footerH * 0.5)}px Fredoka, sans-serif`;
+        x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Strip Photobooth', w / 2, h - pad - footerH / 2);
+    }
+
+    drawWatermark(x, w, h);
+    if (selectedFrame === 'birthday') drawBirthdayDecor(x, w, h);
+    if (selectedFrame === 'graduation') drawGraduationDecor(x, w, h);
 
     return c.toDataURL('image/png');
 }
 
-// ====== THEMED FRAME (Birthday / Graduation) ======
-function assembleThemed(imgs, srcW, srcH, theme) {
-    const pad = 10;
-    const headerH = 70;
-    const count = imgs.length;
-    const imgW = Math.round((srcW * 0.7));
-    const imgH = Math.round(imgW * (srcH / srcW));
-    const w = imgW * count + pad * (count + 1);
-    const h = imgH + headerH + pad * 3;
-
-    const c = document.createElement('canvas');
-    c.width = w; c.height = h;
-    const ctx = c.getContext('2d');
-
-    if (theme === 'birthday') {
-        drawBirthdayFrame(ctx, w, h, imgs, pad, headerH, imgW, imgH, count);
-    } else if (theme === 'graduation') {
-        drawGraduationFrame(ctx, w, h, imgs, pad, headerH, imgW, imgH, count);
-    }
-
-    return c.toDataURL('image/png');
+// ====== FRAME BACKGROUNDS ======
+function drawBirthdayBg(x, w, h) {
+    const g = x.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, '#FFE0EC'); g.addColorStop(0.5, '#FFF5E6'); g.addColorStop(1, '#FFE8CC');
+    x.fillStyle = g; roundRect(x, 0, 0, w, h, 18); x.fill();
+    x.strokeStyle = '#FF6B6B'; x.lineWidth = 4; roundRect(x, 2, 2, w - 4, h - 4, 16); x.stroke();
+    x.setLineDash([8, 6]); x.strokeStyle = '#FFD93D'; x.lineWidth = 2;
+    roundRect(x, 8, 8, w - 16, h - 16, 12); x.stroke(); x.setLineDash([]);
 }
 
-// ====== BIRTHDAY FRAME ======
-function drawBirthdayFrame(ctx, w, h, imgs, pad, headerH, imgW, imgH, count) {
-    // Background warna-warni
-    const grad = ctx.createLinearGradient(0, 0, w, h);
-    grad.addColorStop(0, '#FFE0EC');
-    grad.addColorStop(0.5, '#FFF5E6');
-    grad.addColorStop(1, '#FFE8CC');
-    ctx.fillStyle = grad;
-    roundRect(ctx, 0, 0, w, h, 20);
-    ctx.fill();
+function drawGraduationBg(x, w, h) {
+    const g = x.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#1a1a2e'); g.addColorStop(1, '#16213e');
+    x.fillStyle = g; roundRect(x, 0, 0, w, h, 18); x.fill();
+    x.strokeStyle = '#D4AF37'; x.lineWidth = 4; roundRect(x, 2, 2, w - 4, h - 4, 16); x.stroke();
+    x.strokeStyle = '#D4AF3760'; x.lineWidth = 1; roundRect(x, 10, 10, w - 20, h - 20, 12); x.stroke();
+}
 
-    // Border polka dots
-    ctx.strokeStyle = '#FF6B6B';
-    ctx.lineWidth = 4;
-    roundRect(ctx, 2, 2, w - 4, h - 4, 18);
-    ctx.stroke();
-
-    // Polka dots dekorasi
-    const dotColors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#E040FB'];
-    for (let i = 0; i < 30; i++) {
-        ctx.beginPath();
-        ctx.arc(
-            Math.random() * w,
-            Math.random() * h,
-            3 + Math.random() * 5,
-            0, Math.PI * 2
-        );
-        ctx.fillStyle = dotColors[i % dotColors.length] + '40';
-        ctx.fill();
+function drawBirthdayDecor(x, w, h) {
+    const colors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#E040FB'];
+    for (let i = 0; i < 25; i++) {
+        x.beginPath(); x.arc(Math.random() * w, Math.random() * h, 2 + Math.random() * 5, 0, Math.PI * 2);
+        x.fillStyle = colors[i % colors.length] + '30'; x.fill();
     }
+    for (let i = 0; i < 4; i++) drawBalloon(x, 20 + i * (w - 40) / 3, h - 10, colors[i], Math.round(w * 0.018));
+}
 
-    // Header "Happy Birthday"
-    ctx.fillStyle = '#FF6B6B';
-    ctx.font = `bold ${Math.round(headerH * 0.42)}px Fredoka, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Happy Birthday!', w / 2, pad + headerH * 0.4);
-
-    ctx.fillStyle = '#FFD93D';
-    ctx.font = `${Math.round(headerH * 0.25)}px Fredoka, sans-serif`;
-    ctx.fillText('Ponyo Booth', w / 2, pad + headerH * 0.75);
-
-    // Foto
-    const startY = pad + headerH + pad;
-    for (let i = 0; i < count; i++) {
-        const x = pad + i * (imgW + pad);
-        // Shadow
-        ctx.shadowColor = 'rgba(255,107,107,0.3)';
-        ctx.shadowBlur = 10;
-        ctx.shadowOffsetY = 4;
-        ctx.save();
-        roundRect(ctx, x, startY, imgW, imgH, 12);
-        ctx.clip();
-        ctx.drawImage(imgs[i], x, startY, imgW, imgH);
-        ctx.restore();
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetY = 0;
-        // Border foto
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 3;
-        roundRect(ctx, x, startY, imgW, imgH, 12);
-        ctx.stroke();
-    }
-
-    // Balon dekorasi
-    const balloonColors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#E040FB'];
-    for (let i = 0; i < 5; i++) {
-        const bx = 30 + i * (w - 60) / 4;
-        const by = h - 20;
-        drawBalloon(ctx, bx, by, balloonColors[i], 14);
-    }
-
-    drawWatermark(ctx, w, h);
+function drawGraduationDecor(x, w, h) {
+    for (let i = 0; i < 15; i++) drawStar(x, Math.random() * w, Math.random() * h, 1.5 + Math.random() * 2.5, '#D4AF3760');
+    drawGradCap(x, w * 0.06, h * 0.03, Math.round(w * 0.025), '#D4AF37');
+    drawGradCap(x, w * 0.92, h * 0.04, Math.round(w * 0.02), '#D4AF37');
 }
 
 function drawBalloon(ctx, x, y, color, r) {
-    // Tali
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.quadraticCurveTo(x + 5, y + 20, x - 3, y + 35);
-    ctx.strokeStyle = '#999';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    // Badan balon
-    ctx.beginPath();
-    ctx.ellipse(x, y - r, r * 0.8, r, 0, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    // Kilau
-    ctx.beginPath();
-    ctx.ellipse(x - r * 0.25, y - r * 1.2, r * 0.15, r * 0.3, -0.3, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.fill();
-    // Titik bawah
-    ctx.beginPath();
-    ctx.moveTo(x - 3, y);
-    ctx.lineTo(x, y + 5);
-    ctx.lineTo(x + 3, y);
-    ctx.fillStyle = color;
-    ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x, y);
+    ctx.quadraticCurveTo(x + 4, y + r * 1.5, x - 2, y + r * 2.5);
+    ctx.strokeStyle = '#999'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(x, y - r, r * 0.8, r, 0, 0, Math.PI * 2);
+    ctx.fillStyle = color; ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x - r * 0.2, y - r * 1.15, r * 0.12, r * 0.25, -0.3, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fill();
 }
 
-// ====== GRADUATION FRAME ======
-function drawGraduationFrame(ctx, w, h, imgs, pad, headerH, imgW, imgH, count) {
-    // Background hitam emas
-    const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, '#1a1a2e');
-    grad.addColorStop(1, '#16213e');
-    ctx.fillStyle = grad;
-    roundRect(ctx, 0, 0, w, h, 20);
-    ctx.fill();
-
-    // Border emas
-    ctx.strokeStyle = '#D4AF37';
-    ctx.lineWidth = 4;
-    roundRect(ctx, 2, 2, w - 4, h - 4, 18);
-    ctx.stroke();
-
-    // Inner border emas tipis
-    ctx.strokeStyle = '#D4AF3760';
-    ctx.lineWidth = 1;
-    roundRect(ctx, 10, 10, w - 20, h - 20, 14);
-    ctx.stroke();
-
-    // Bintang-bintang emas
-    for (let i = 0; i < 20; i++) {
-        const sx = Math.random() * w;
-        const sy = Math.random() * h;
-        drawStar(ctx, sx, sy, 1 + Math.random() * 2.5, '#D4AF37');
-    }
-
-    // Header
-    ctx.fillStyle = '#D4AF37';
-    ctx.font = `bold ${Math.round(headerH * 0.4)}px Fredoka, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Congratulations!', w / 2, pad + headerH * 0.38);
-
-    ctx.fillStyle = '#FFFFFFCC';
-    ctx.font = `${Math.round(headerH * 0.22)}px Fredoka, sans-serif`;
-    ctx.fillText('Ponyo Booth', w / 2, pad + headerH * 0.72);
-
-    // Topi wisuda di header
-    drawGradCap(ctx, w / 2 - 60, pad + 8, 18, '#D4AF37');
-    drawGradCap(ctx, w / 2 + 45, pad + 12, 14, '#D4AF37');
-
-    // Foto
-    const startY = pad + headerH + pad;
-    for (let i = 0; i < count; i++) {
-        const x = pad + i * (imgW + pad);
-        // Frame emas
-        ctx.shadowColor = 'rgba(212,175,55,0.4)';
-        ctx.shadowBlur = 12;
-        ctx.fillStyle = '#D4AF37';
-        roundRect(ctx, x - 3, startY - 3, imgW + 6, imgH + 6, 10);
-        ctx.fill();
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-
-        ctx.save();
-        roundRect(ctx, x, startY, imgW, imgH, 8);
-        ctx.clip();
-        ctx.drawImage(imgs[i], x, startY, imgW, imgH);
-        ctx.restore();
-    }
-
-    drawWatermark(ctx, w, h);
-}
-
-function drawGradCap(ctx, x, y, size, color) {
-    // Board
+function drawGradCap(ctx, x, y, s, color) {
     ctx.fillStyle = color;
-    ctx.fillRect(x - size, y, size * 2, size * 0.4);
-    // Top
-    ctx.beginPath();
-    ctx.moveTo(x - size, y);
-    ctx.lineTo(x, y - size * 0.6);
-    ctx.lineTo(x + size, y);
-    ctx.closePath();
-    ctx.fill();
-    // Tassel
-    ctx.beginPath();
-    ctx.moveTo(x + size * 0.5, y + size * 0.1);
-    ctx.lineTo(x + size * 0.5, y + size * 1.2);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(x + size * 0.5, y + size * 1.3, size * 0.2, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
+    ctx.fillRect(x - s, y, s * 2, s * 0.35);
+    ctx.beginPath(); ctx.moveTo(x - s, y); ctx.lineTo(x, y - s * 0.6); ctx.lineTo(x + s, y); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + s * 0.5, y + s * 0.1); ctx.lineTo(x + s * 0.5, y + s * 1.1);
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.beginPath(); ctx.arc(x + s * 0.5, y + s * 1.2, s * 0.18, 0, Math.PI * 2); ctx.fill();
 }
 
 function drawStar(ctx, cx, cy, r, color) {
     ctx.beginPath();
     for (let i = 0; i < 5; i++) {
-        const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
-        const x = cx + r * Math.cos(angle);
-        const y = cy + r * Math.sin(angle);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        const a = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+        i === 0 ? ctx.moveTo(cx + r * Math.cos(a), cy + r * Math.sin(a)) : ctx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
     }
-    ctx.closePath();
-    ctx.fillStyle = color + '80';
-    ctx.fill();
+    ctx.closePath(); ctx.fillStyle = color; ctx.fill();
 }
 
-// ====== DRAW FRAME OVERLAY (untuk single shot themed) ======
-function drawFrameOverlay(canvas, theme) {
-    const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
-
-    if (theme === 'birthday') {
-        // Border pink tebal
-        ctx.strokeStyle = '#FF6B6B';
-        ctx.lineWidth = Math.round(w * 0.015);
-        roundRect(ctx, w * 0.01, h * 0.01, w * 0.98, h * 0.98, 16);
-        ctx.stroke();
-        // Inner border putus-putus
-        ctx.setLineDash([8, 6]);
-        ctx.strokeStyle = '#FFD93D';
-        ctx.lineWidth = Math.round(w * 0.005);
-        roundRect(ctx, w * 0.03, h * 0.03, w * 0.94, h * 0.94, 12);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        // Teks Happy Birthday
-        ctx.save();
-        const fs = Math.round(w * 0.06);
-        ctx.font = `bold ${fs}px Fredoka, sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.fillStyle = '#FF6B6B';
-        ctx.shadowColor = 'rgba(255,255,255,0.8)';
-        ctx.shadowBlur = 6;
-        ctx.fillText('Happy Birthday!', w / 2, h * 0.03);
-        ctx.restore();
-        // Balon di pojok
-        drawBalloon(ctx, w * 0.08, h * 0.88, '#FF6B6B', Math.round(w * 0.025));
-        drawBalloon(ctx, w * 0.15, h * 0.92, '#FFD93D', Math.round(w * 0.02));
-        drawBalloon(ctx, w * 0.92, h * 0.85, '#6BCB77', Math.round(w * 0.022));
-    } else if (theme === 'graduation') {
-        // Border emas
-        ctx.strokeStyle = '#D4AF37';
-        ctx.lineWidth = Math.round(w * 0.012);
-        roundRect(ctx, w * 0.008, h * 0.008, w * 0.984, h * 0.984, 16);
-        ctx.stroke();
-        ctx.strokeStyle = '#D4AF3760';
-        ctx.lineWidth = Math.round(w * 0.004);
-        roundRect(ctx, w * 0.025, h * 0.025, w * 0.95, h * 0.95, 12);
-        ctx.stroke();
-        // Teks Congratulations
-        ctx.save();
-        const fs = Math.round(w * 0.05);
-        ctx.font = `bold ${fs}px Fredoka, sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.fillStyle = '#D4AF37';
-        ctx.shadowColor = 'rgba(0,0,0,0.5)';
-        ctx.shadowBlur = 6;
-        ctx.fillText('Congratulations!', w / 2, h * 0.02);
-        ctx.restore();
-        // Topi wisuda
-        drawGradCap(ctx, w * 0.06, h * 0.04, Math.round(w * 0.03), '#D4AF37');
-        drawGradCap(ctx, w * 0.9, h * 0.05, Math.round(w * 0.025), '#D4AF37');
-        // Bintang
-        for (let i = 0; i < 8; i++) {
-            drawStar(ctx, Math.random() * w, Math.random() * h, 2 + Math.random() * 3, '#D4AF37');
-        }
-    }
-}
-
-// ====== ROUND RECT HELPER ======
 function roundRect(ctx, x, y, w, h, r) {
     r = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
+    ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
 }
 
 // ====== GALERI ======
 function updateGallery() {
     gallerySection.style.display = '';
     galleryGrid.innerHTML = '';
-    photos.forEach((photo, idx) => {
+    photos.forEach((p, i) => {
         const item = document.createElement('div');
-        item.className = 'gallery-item' + (photo.type === 'multi' ? ' multi-item' : '');
+        item.className = 'gallery-item multi-item';
         item.innerHTML = `
-            <img src="${photo.url}" alt="Foto ${idx + 1}" loading="lazy">
+            <img src="${p.url}" alt="Foto ${i + 1}" loading="lazy">
             <div class="gallery-item-actions">
-                <button class="btn-dl" onclick="downloadPhoto(${idx})" aria-label="Download foto ${idx + 1}">
-                    <i class="fa-solid fa-download"></i>
-                </button>
-                <button class="btn-del" onclick="deletePhoto(${idx})" aria-label="Hapus foto ${idx + 1}">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
+                <button class="btn-dl" onclick="downloadPhoto(${i})" aria-label="Download"><i class="fa-solid fa-download"></i></button>
+                <button class="btn-del" onclick="deletePhoto(${i})" aria-label="Hapus"><i class="fa-solid fa-trash"></i></button>
             </div>
         `;
-        item.querySelector('img').onclick = () => openModal(photo.url);
+        item.querySelector('img').onclick = () => openModal(p.url);
         galleryGrid.appendChild(item);
     });
 }
-
-function downloadPhoto(idx) {
-    const a = document.createElement('a');
-    a.href = photos[idx].url;
-    a.download = `ponyo-booth-${Date.now()}.png`;
-    a.click();
+function downloadPhoto(i) {
+    const a = document.createElement('a'); a.href = photos[i].url;
+    a.download = `ponyo-booth-${Date.now()}.png`; a.click();
     showToast('Foto didownload!', 'fa-solid fa-download');
 }
-
-function deletePhoto(idx) {
-    photos.splice(idx, 1);
-    updateGallery();
-    if (photos.length === 0) gallerySection.style.display = 'none';
+function deletePhoto(i) {
+    photos.splice(i, 1); updateGallery();
+    if (!photos.length) gallerySection.style.display = 'none';
     showToast('Foto dihapus', 'fa-solid fa-trash');
 }
 
 // ====== MODAL ======
-function openModal(src) {
-    document.getElementById('modalImg').src = src;
-    document.getElementById('modal').classList.add('active');
-}
-function closeModal() {
-    document.getElementById('modal').classList.remove('active');
-}
-function downloadModalImg() {
-    const src = document.getElementById('modalImg').src;
-    const a = document.createElement('a');
-    a.href = src;
-    a.download = `ponyo-booth-${Date.now()}.png`;
-    a.click();
-}
-document.getElementById('modal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeModal();
-});
+function openModal(src) { document.getElementById('modalImg').src = src; document.getElementById('modal').classList.add('active'); }
+function closeModal() { document.getElementById('modal').classList.remove('active'); }
+function downloadModalImg() { const a = document.createElement('a'); a.href = document.getElementById('modalImg').src; a.download = `ponyo-booth-${Date.now()}.png`; a.click(); }
+document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 
 // ====== TOAST ======
 function showToast(msg, icon) {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerHTML = `<i class="${icon}" style="color:var(--accent3);"></i> ${msg}`;
-    container.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    const t = document.createElement('div'); t.className = 'toast';
+    t.innerHTML = `<i class="${icon}" style="color:var(--accent3);"></i> ${msg}`;
+    document.getElementById('toastContainer').appendChild(t);
+    setTimeout(() => t.remove(), 3000);
 }
 
 // ====== CONFETTI ======
 const confettiCanvas = document.getElementById('confettiCanvas');
 const cCtx = confettiCanvas.getContext('2d');
-let confettiPieces = [];
-let confettiRunning = false;
-
-function resizeConfetti() {
-    confettiCanvas.width = window.innerWidth;
-    confettiCanvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeConfetti);
-resizeConfetti();
+let confettiPieces = [], confettiRunning = false;
+function resizeConfetti() { confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeConfetti); resizeConfetti();
 
 function launchConfetti() {
     confettiPieces = [];
     const colors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FF8E53', '#E040FB', '#00E5FF'];
-    for (let i = 0; i < 120; i++) {
-        confettiPieces.push({
-            x: Math.random() * confettiCanvas.width,
-            y: Math.random() * confettiCanvas.height - confettiCanvas.height,
-            w: Math.random() * 10 + 5,
-            h: Math.random() * 6 + 3,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            vx: (Math.random() - 0.5) * 4,
-            vy: Math.random() * 3 + 2,
-            rotation: Math.random() * 360,
-            rotSpeed: (Math.random() - 0.5) * 10,
-            opacity: 1,
-        });
-    }
-    if (!confettiRunning) {
-        confettiRunning = true;
-        animateConfetti();
-    }
+    for (let i = 0; i < 100; i++) confettiPieces.push({
+        x: Math.random() * confettiCanvas.width, y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+        w: Math.random() * 10 + 5, h: Math.random() * 6 + 3, color: colors[i % colors.length],
+        vx: (Math.random() - 0.5) * 4, vy: Math.random() * 3 + 2,
+        rotation: Math.random() * 360, rotSpeed: (Math.random() - 0.5) * 10, opacity: 1,
+    });
+    if (!confettiRunning) { confettiRunning = true; animConfetti(); }
 }
-
-function animateConfetti() {
+function animConfetti() {
     cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
     let alive = false;
     confettiPieces.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.rotation += p.rotSpeed;
-        p.vy += 0.05;
+        p.x += p.vx; p.y += p.vy; p.rotation += p.rotSpeed; p.vy += 0.05;
         if (p.y > confettiCanvas.height - 50) p.opacity -= 0.02;
         if (p.opacity > 0) {
-            alive = true;
-            cCtx.save();
-            cCtx.globalAlpha = Math.max(0, p.opacity);
-            cCtx.translate(p.x, p.y);
-            cCtx.rotate((p.rotation * Math.PI) / 180);
-            cCtx.fillStyle = p.color;
-            cCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-            cCtx.restore();
+            alive = true; cCtx.save(); cCtx.globalAlpha = Math.max(0, p.opacity);
+            cCtx.translate(p.x, p.y); cCtx.rotate(p.rotation * Math.PI / 180);
+            cCtx.fillStyle = p.color; cCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); cCtx.restore();
         }
     });
-    if (alive) requestAnimationFrame(animateConfetti);
-    else {
-        confettiRunning = false;
-        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-    }
+    if (alive) requestAnimationFrame(animConfetti);
+    else { confettiRunning = false; cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); }
 }
 
-// ====== UTILS ======
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ====== KEYBOARD ======
-document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && stream && !isCapturing) {
-        e.preventDefault();
-        handleCapture();
-    }
+document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && stream && !isCapturing) { e.preventDefault(); handleCapture(); }
     if (e.code === 'Escape') closeModal();
-    // Keyboard shortcut untuk stiker yang terpilih
     if (selectedStickerEl) {
         if (e.code === 'BracketLeft') rotateSticker(selectedStickerEl, -15);
         if (e.code === 'BracketRight') rotateSticker(selectedStickerEl, 15);
         if (e.code === 'Equal' || e.code === 'NumpadAdd') scaleSticker(selectedStickerEl, 1.15);
         if (e.code === 'Minus' || e.code === 'NumpadSubtract') scaleSticker(selectedStickerEl, 0.85);
         if (e.code === 'Delete' || e.code === 'Backspace') {
-            selectedStickerEl.remove();
-            placedStickers = placedStickers.filter(s => s !== selectedStickerEl);
-            selectedStickerEl = null;
+            selectedStickerEl.remove(); placedStickers = placedStickers.filter(s => s !== selectedStickerEl); selectedStickerEl = null;
         }
     }
 });
@@ -1890,6 +1617,8 @@ document.addEventListener('keydown', (e) => {
 // ====== INIT ======
 initFilterGrid();
 initStickerGrid();
+drawMiniPreviews();
+updateTimerLabel();
 </script>
 </body>
 </html>
